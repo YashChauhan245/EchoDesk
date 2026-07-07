@@ -1,13 +1,16 @@
-// ===========================================
-// Chatbot Settings Page
-// ===========================================
-// Client component with a form for configuring the chatbot.
-// Handles loading existing settings, editing, and saving via API.
-// ===========================================
-
 "use client";
 
 import { useState, useEffect } from "react";
+import { 
+  Building, 
+  BookOpen, 
+  Palette, 
+  Save, 
+  Loader2, 
+  CheckCircle2, 
+  AlertCircle,
+  HelpCircle
+} from "lucide-react";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -98,69 +101,60 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="spinner !w-8 !h-8 !border-[3px]" />
+        <Loader2 className="w-8 h-8 text-[#c084fc] animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in space-y-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">
+      <div>
+        <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">
           Chatbot Settings
         </h1>
-        <p className="text-[var(--text-secondary)]">
-          Configure your AI chatbot&apos;s knowledge base, appearance, and
-          behavior.
+        <p className="text-sm text-[#94a3b8]">
+          Configure your AI agent identity, context rules, support instructions, and widget UI design.
         </p>
       </div>
 
       {/* Settings Form */}
-      <form onSubmit={handleSave} className="space-y-6 max-w-2xl">
+      <form onSubmit={handleSave} className="space-y-6 max-w-3xl">
+        
         {/* Business Details Section */}
-        <div className="glass-card p-6 !transform-none !shadow-none">
-          <h2 className="text-base font-semibold text-[var(--text-primary)] mb-5 flex items-center gap-2">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--primary-light)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            Business Details
+        <div className="glass-card p-6 border border-white/[0.04] relative">
+          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#c084fc]/15 to-transparent" />
+          <h2 className="text-sm font-semibold text-white mb-5 flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-[#c084fc]/10 border border-[#c084fc]/20 flex items-center justify-center text-[#c084fc]">
+              <Building className="w-4 h-4" />
+            </div>
+            Business Profile
           </h2>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-2">
                 Business Name <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="e.g. Gada Electronics"
+                placeholder="e.g. Acme Corporation"
                 className="input-field"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-2">
                 Support Email <span className="text-red-400">*</span>
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. support@gada.com"
+                placeholder="e.g. support@acme.com"
                 className="input-field"
                 required
               />
@@ -169,26 +163,24 @@ export default function SettingsPage() {
         </div>
 
         {/* Knowledge Base Section */}
-        <div className="glass-card p-6 !transform-none !shadow-none">
-          <h2 className="text-base font-semibold text-[var(--text-primary)] mb-2 flex items-center gap-2">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--primary-light)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-            </svg>
-            Knowledge Base
-          </h2>
-          <p className="text-xs text-[var(--text-muted)] mb-4">
-            Enter everything about your business that the AI should know — FAQs,
-            policies, product details, support instructions, etc.
+        <div className="glass-card p-6 border border-white/[0.04] relative">
+          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#6366f1]/15 to-transparent" />
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-semibold text-white flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-[#6366f1]/10 border border-[#6366f1]/20 flex items-center justify-center text-[#6366f1]">
+                <BookOpen className="w-4 h-4" />
+              </div>
+              Knowledge Base Training Context
+            </h2>
+            <div className="group relative">
+              <HelpCircle className="w-4 h-4 text-[#475569] hover:text-[#94a3b8] cursor-pointer" />
+              <div className="absolute right-0 bottom-full mb-2 w-72 p-3 bg-[#08080d] border border-white/[0.06] rounded-lg text-[10px] text-[#94a3b8] leading-relaxed shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20">
+                Provide detailed paragraphs, FAQs, rules, and links. The Gemini model uses this data exclusively to build responses.
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-[#94a3b8] mb-5 leading-relaxed">
+            Enter all core facts, business details, operating hours, policies, and FAQs the AI agent needs to formulate support replies.
           </p>
 
           <textarea
@@ -196,84 +188,59 @@ export default function SettingsPage() {
             onChange={(e) => setKnowledgeBase(e.target.value)}
             placeholder={`Example:
 
-You are an AI customer support assistant for Gada Electronics.
+You are an AI support assistant for Acme Corporation.
 
-Store Details:
-Gada Electronics sells mobile phones, laptops, and accessories.
-We have stores in Mumbai, Delhi, and Bangalore.
-Operating hours: 10 AM to 9 PM, Monday to Saturday.
-
-Products:
-- Smartphones: iPhone, Samsung Galaxy, OnePlus
-- Laptops: MacBook, Dell XPS, HP Spectre
-- Accessories: Cases, chargers, earphones
-
-Policies:
-- Refund available within 7 days of purchase with original receipt.
-- Exchange available within 15 days.
-- Warranty as per manufacturer terms.
+Company Details:
+Acme Corporation offers premium cloud services.
+Operating hours: 24/7.
+Refund Policy: Refund request is eligible within 14 days of subscription activation.
 
 FAQs:
-Q: Do you offer EMI?
-A: Yes, we offer EMI on all products above ₹10,000 via major banks.
-
-Q: Do you deliver?
-A: Yes, we deliver across India. Free delivery on orders above ₹5,000.
-
-Support Contact:
-- Email: support@gada.com
-- Phone: +91 98765 43210`}
-            className="textarea-field !min-h-[350px]"
+Q: Do you support Single Sign-On (SSO)?
+A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
+            className="textarea-field !min-h-[300px] font-sans leading-relaxed text-xs"
             required
           />
 
-          <p className="text-xs text-[var(--text-muted)] mt-2 text-right">
-            {knowledgeBase.length.toLocaleString()} / 50,000 characters
-          </p>
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-[10px] text-[#475569]">Supports Markdown format</span>
+            <span className={`text-[10px] ${knowledgeBase.length > 45000 ? "text-amber-400" : "text-[#475569]"}`}>
+              {knowledgeBase.length.toLocaleString()} / 50,000 characters
+            </span>
+          </div>
         </div>
 
         {/* Widget Appearance Section */}
-        <div className="glass-card p-6 !transform-none !shadow-none">
-          <h2 className="text-base font-semibold text-[var(--text-primary)] mb-5 flex items-center gap-2">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--primary-light)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="13.5" cy="6.5" r="0.5" fill="currentColor" />
-              <circle cx="17.5" cy="10.5" r="0.5" fill="currentColor" />
-              <circle cx="8.5" cy="7.5" r="0.5" fill="currentColor" />
-              <circle cx="6.5" cy="12.5" r="0.5" fill="currentColor" />
-              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
-            </svg>
+        <div className="glass-card p-6 border border-white/[0.04] relative">
+          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+          <h2 className="text-sm font-semibold text-white mb-5 flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-[#94a3b8]">
+              <Palette className="w-4 h-4" />
+            </div>
             Widget Appearance
           </h2>
 
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
-                Theme Color
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-2">
+                Brand Accent Color
               </label>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 bg-white/[0.01] p-3 rounded-lg border border-white/[0.03]">
                 <input
                   type="color"
                   value={widgetColor}
                   onChange={(e) => setWidgetColor(e.target.value)}
-                  className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--border)] bg-transparent"
+                  className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent"
                 />
                 <input
                   type="text"
                   value={widgetColor}
                   onChange={(e) => setWidgetColor(e.target.value)}
-                  className="input-field !w-32 font-mono text-sm"
+                  className="input-field !w-28 font-mono text-xs text-center !py-1.5"
                 />
+                
                 {/* Color presets */}
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 ml-2">
                   {[
                     "#6366f1",
                     "#8b5cf6",
@@ -287,11 +254,11 @@ Support Contact:
                       key={color}
                       type="button"
                       onClick={() => setWidgetColor(color)}
-                      className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110"
+                      className="w-6 h-6 rounded-full border transition-transform hover:scale-110 cursor-pointer"
                       style={{
                         backgroundColor: color,
                         borderColor:
-                          widgetColor === color
+                          widgetColor.toLowerCase() === color.toLowerCase()
                             ? "white"
                             : "transparent",
                       }}
@@ -302,8 +269,8 @@ Support Contact:
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
-                Welcome Message
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-2">
+                Welcome Response Prompt
               </label>
               <input
                 type="text"
@@ -317,34 +284,21 @@ Support Contact:
         </div>
 
         {/* Save Button */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 pt-2">
           <button
             type="submit"
             disabled={saving}
-            className="btn-primary !py-3 !px-8"
+            className="btn-primary !py-3 !px-8 text-xs font-semibold uppercase tracking-wider cursor-pointer"
           >
             {saving ? (
               <>
-                <div className="spinner" />
-                Saving...
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Saving Changes...
               </>
             ) : (
               <>
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                  <polyline points="17 21 17 13 7 13 7 21" />
-                  <polyline points="7 3 7 8 15 8" />
-                </svg>
-                Save Settings
+                <Save className="w-4 h-4" />
+                Save Configurations
               </>
             )}
           </button>
@@ -354,7 +308,8 @@ Support Contact:
       {/* Toast Notification */}
       {toast && (
         <div className={`toast ${toast.type === "success" ? "toast-success" : "toast-error"}`}>
-          {toast.message}
+          {toast.type === "success" ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          <span>{toast.message}</span>
         </div>
       )}
     </div>

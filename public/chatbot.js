@@ -63,7 +63,7 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
       }
 
       .echodesk-bubble {
@@ -74,27 +74,27 @@
         height: 60px;
         border-radius: 50%;
         background: ${widgetColor};
-        border: none;
+        border: 1px solid rgba(255,255,255,0.1);
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 0 0 0 ${widgetColor}40;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.18), inset 0 2px 4px rgba(255,255,255,0.25);
         z-index: 2147483646;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        animation: echodesk-pulse 2s ease-in-out 3;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: echodesk-pulse 2.5s ease-in-out infinite;
       }
 
       .echodesk-bubble:hover {
-        transform: scale(1.08);
-        box-shadow: 0 6px 32px rgba(0,0,0,0.3);
+        transform: scale(1.08) translateY(-2px);
+        box-shadow: 0 12px 36px rgba(0,0,0,0.22), inset 0 2px 4px rgba(255,255,255,0.3);
       }
 
       .echodesk-bubble svg {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
         fill: white;
-        transition: transform 0.3s ease;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       .echodesk-bubble.echodesk-open svg {
@@ -102,27 +102,27 @@
       }
 
       @keyframes echodesk-pulse {
-        0%, 100% { box-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 0 0 0 ${widgetColor}40; }
-        50% { box-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 0 0 12px ${widgetColor}00; }
+        0%, 100% { box-shadow: 0 10px 30px rgba(0,0,0,0.18), 0 0 0 0 ${widgetColor}40; }
+        50% { box-shadow: 0 10px 30px rgba(0,0,0,0.18), 0 0 0 14px ${widgetColor}00; }
       }
 
       .echodesk-window {
         position: fixed;
         bottom: 96px;
         right: 24px;
-        width: 380px;
-        height: 520px;
+        width: 370px;
+        height: 530px;
         background: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 12px 48px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05);
+        border-radius: 20px;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.04);
         z-index: 2147483646;
         display: flex;
         flex-direction: column;
         overflow: hidden;
         opacity: 0;
-        transform: translateY(16px) scale(0.95);
+        transform: translateY(20px) scale(0.95);
         pointer-events: none;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       .echodesk-window.echodesk-visible {
@@ -139,96 +139,113 @@
         align-items: center;
         gap: 12px;
         flex-shrink: 0;
+        position: relative;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       }
 
       .echodesk-header-avatar {
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
-        background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.15);
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);
       }
 
       .echodesk-header-avatar svg {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
         fill: white;
       }
 
       .echodesk-header-info h3 {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 600;
-        margin-bottom: 1px;
+        margin-bottom: 2px;
         color: white;
+        letter-spacing: -0.01em;
       }
 
       .echodesk-header-info p {
-        font-size: 12px;
+        font-size: 11px;
         opacity: 0.85;
         color: white;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .echodesk-header-info p::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background: #10b981;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #10b981;
       }
 
       .echodesk-close {
         margin-left: auto;
-        background: rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.12);
         border: none;
-        width: 28px;
-        height: 28px;
+        width: 26px;
+        height: 26px;
         border-radius: 50%;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: background 0.2s;
+        transition: all 0.2s ease;
         flex-shrink: 0;
       }
 
       .echodesk-close:hover {
-        background: rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.22);
+        transform: scale(1.05);
       }
 
       .echodesk-close svg {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         stroke: white;
         fill: none;
-        stroke-width: 2;
+        stroke-width: 2.5;
       }
 
       .echodesk-messages {
         flex: 1;
         overflow-y: auto;
-        padding: 16px;
+        padding: 20px;
         display: flex;
         flex-direction: column;
         gap: 12px;
-        background: #f8f9fb;
+        background: #f8fafc;
       }
 
       .echodesk-messages::-webkit-scrollbar {
-        width: 4px;
+        width: 5px;
       }
 
       .echodesk-messages::-webkit-scrollbar-thumb {
-        background: #d1d5db;
-        border-radius: 2px;
+        background: #cbd5e1;
+        border-radius: 3px;
       }
 
       .echodesk-msg {
-        max-width: 85%;
+        max-width: 80%;
         padding: 10px 14px;
-        border-radius: 14px;
-        font-size: 14px;
-        line-height: 1.5;
+        font-size: 13.5px;
+        line-height: 1.45;
         word-wrap: break-word;
-        animation: echodesk-msgIn 0.3s ease-out;
+        animation: echodesk-msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
 
       @keyframes echodesk-msgIn {
-        from { opacity: 0; transform: translateY(8px); }
+        from { opacity: 0; transform: translateY(6px); }
         to { opacity: 1; transform: translateY(0); }
       }
 
@@ -236,33 +253,36 @@
         align-self: flex-end;
         background: ${widgetColor};
         color: white;
-        border-bottom-right-radius: 4px;
+        border-radius: 16px 16px 4px 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       }
 
       .echodesk-msg-assistant {
         align-self: flex-start;
         background: white;
-        color: #1f2937;
-        border: 1px solid #e5e7eb;
-        border-bottom-left-radius: 4px;
+        color: #1e293b;
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 16px 16px 16px 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
       }
 
       .echodesk-typing {
         align-self: flex-start;
         background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 16px 16px 16px 4px;
         padding: 12px 16px;
         display: flex;
         gap: 4px;
         align-items: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
       }
 
       .echodesk-dot {
-        width: 7px;
-        height: 7px;
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
-        background: #9ca3af;
+        background: #94a3b8;
         animation: echodesk-bounce 1.2s ease-in-out infinite;
       }
 
@@ -271,12 +291,12 @@
 
       @keyframes echodesk-bounce {
         0%, 60%, 100% { transform: translateY(0); }
-        30% { transform: translateY(-6px); }
+        30% { transform: translateY(-4px); }
       }
 
       .echodesk-input-area {
-        padding: 12px 16px;
-        border-top: 1px solid #e5e7eb;
+        padding: 14px 16px;
+        border-top: 1px solid #f1f5f9;
         display: flex;
         gap: 8px;
         align-items: center;
@@ -287,69 +307,71 @@
       .echodesk-input {
         flex: 1;
         padding: 10px 14px;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #e2e8f0;
         border-radius: 10px;
-        font-size: 14px;
+        font-size: 13px;
         outline: none;
-        background: #f9fafb;
-        color: #1f2937;
-        transition: border-color 0.2s;
+        background: #f8fafc;
+        color: #1e293b;
+        transition: all 0.2s ease;
         font-family: inherit;
       }
 
       .echodesk-input:focus {
         border-color: ${widgetColor};
-        box-shadow: 0 0 0 2px ${widgetColor}20;
+        background: white;
+        box-shadow: 0 0 0 3px ${widgetColor}20;
       }
 
       .echodesk-input::placeholder {
-        color: #9ca3af;
+        color: #94a3b8;
       }
 
       .echodesk-send {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
         background: ${widgetColor};
         border: none;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
         flex-shrink: 0;
       }
 
       .echodesk-send:hover {
-        opacity: 0.9;
-        transform: scale(1.05);
+        transform: scale(1.04);
+        filter: brightness(1.05);
       }
 
       .echodesk-send:disabled {
-        opacity: 0.5;
+        opacity: 0.4;
         cursor: not-allowed;
         transform: none;
       }
 
       .echodesk-send svg {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         fill: white;
       }
 
       .echodesk-powered {
         text-align: center;
-        padding: 6px;
+        padding: 8px;
         font-size: 10px;
-        color: #9ca3af;
+        color: #94a3b8;
         background: white;
-        border-top: 1px solid #f3f4f6;
+        border-top: 1px solid #f1f5f9;
       }
 
       .echodesk-powered a {
-        color: #6b7280;
+        color: #64748b;
         text-decoration: none;
         font-weight: 500;
+        transition: color 0.15s ease;
       }
 
       .echodesk-powered a:hover {
@@ -362,14 +384,14 @@
           height: calc(100vh - 80px);
           bottom: 72px;
           right: 8px;
-          border-radius: 12px;
+          border-radius: 14px;
         }
 
         .echodesk-bubble {
           bottom: 16px;
           right: 16px;
-          width: 54px;
-          height: 54px;
+          width: 56px;
+          height: 56px;
         }
       }
     `;
