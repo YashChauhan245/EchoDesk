@@ -101,7 +101,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 text-[#c084fc] animate-spin" />
+        <Loader2 className="w-8 h-8 text-black dark:text-white animate-spin" />
       </div>
     );
   }
@@ -110,10 +110,10 @@ export default function SettingsPage() {
     <div className="animate-fade-in space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">
+        <h1 className="text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
           Chatbot Settings
         </h1>
-        <p className="text-sm text-[#94a3b8]">
+        <p className="text-sm text-[#5f6368] dark:text-[#94a3b8]">
           Configure your AI agent identity, context rules, support instructions, and widget UI design.
         </p>
       </div>
@@ -122,10 +122,9 @@ export default function SettingsPage() {
       <form onSubmit={handleSave} className="space-y-6 max-w-3xl">
         
         {/* Business Details Section */}
-        <div className="glass-card p-6 border border-white/[0.04] relative">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#c084fc]/15 to-transparent" />
-          <h2 className="text-sm font-semibold text-white mb-5 flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-[#c084fc]/10 border border-[#c084fc]/20 flex items-center justify-center text-[#c084fc]">
+        <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
+          <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-5 flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
               <Building className="w-4 h-4" />
             </div>
             Business Profile
@@ -133,7 +132,7 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
                 Business Name <span className="text-red-400">*</span>
               </label>
               <input
@@ -147,7 +146,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
                 Support Email <span className="text-red-400">*</span>
               </label>
               <input
@@ -163,23 +162,22 @@ export default function SettingsPage() {
         </div>
 
         {/* Knowledge Base Section */}
-        <div className="glass-card p-6 border border-white/[0.04] relative">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#6366f1]/15 to-transparent" />
+        <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-semibold text-white flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-[#6366f1]/10 border border-[#6366f1]/20 flex items-center justify-center text-[#6366f1]">
+            <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
                 <BookOpen className="w-4 h-4" />
               </div>
               Knowledge Base Training Context
             </h2>
             <div className="group relative">
-              <HelpCircle className="w-4 h-4 text-[#475569] hover:text-[#94a3b8] cursor-pointer" />
-              <div className="absolute right-0 bottom-full mb-2 w-72 p-3 bg-[#08080d] border border-white/[0.06] rounded-lg text-[10px] text-[#94a3b8] leading-relaxed shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20">
+              <HelpCircle className="w-4 h-4 text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white cursor-pointer" />
+              <div className="absolute right-0 bottom-full mb-2 w-72 p-3 bg-black border border-black rounded-lg text-[10px] text-white leading-relaxed shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20">
                 Provide detailed paragraphs, FAQs, rules, and links. The Gemini model uses this data exclusively to build responses.
               </div>
             </div>
           </div>
-          <p className="text-xs text-[#94a3b8] mb-5 leading-relaxed">
+          <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] mb-5 leading-relaxed">
             Enter all core facts, business details, operating hours, policies, and FAQs the AI agent needs to formulate support replies.
           </p>
 
@@ -187,14 +185,14 @@ export default function SettingsPage() {
             value={knowledgeBase}
             onChange={(e) => setKnowledgeBase(e.target.value)}
             placeholder={`Example:
-
+ 
 You are an AI support assistant for Acme Corporation.
-
+ 
 Company Details:
 Acme Corporation offers premium cloud services.
 Operating hours: 24/7.
 Refund Policy: Refund request is eligible within 14 days of subscription activation.
-
+ 
 FAQs:
 Q: Do you support Single Sign-On (SSO)?
 A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
@@ -203,18 +201,17 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
           />
 
           <div className="flex items-center justify-between mt-2">
-            <span className="text-[10px] text-[#475569]">Supports Markdown format</span>
-            <span className={`text-[10px] ${knowledgeBase.length > 45000 ? "text-amber-400" : "text-[#475569]"}`}>
+            <span className="text-[10px] text-[#5f6368] dark:text-[#94a3b8]">Supports Markdown format</span>
+            <span className={`text-[10px] ${knowledgeBase.length > 45000 ? "text-amber-500 font-semibold" : "text-[#5f6368] dark:text-[#94a3b8]"}`}>
               {knowledgeBase.length.toLocaleString()} / 50,000 characters
             </span>
           </div>
         </div>
 
         {/* Widget Appearance Section */}
-        <div className="glass-card p-6 border border-white/[0.04] relative">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
-          <h2 className="text-sm font-semibold text-white mb-5 flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-white/[0.02] border border-white/[0.05] flex items-center justify-center text-[#94a3b8]">
+        <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
+          <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-5 flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
               <Palette className="w-4 h-4" />
             </div>
             Widget Appearance
@@ -222,10 +219,10 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
 
           <div className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
                 Brand Accent Color
               </label>
-              <div className="flex flex-wrap items-center gap-3 bg-white/[0.01] p-3 rounded-lg border border-white/[0.03]">
+              <div className="flex flex-wrap items-center gap-3 bg-neutral-50 dark:bg-white/[0.02] p-3 rounded-lg border border-black/[0.04] dark:border-white/[0.06]">
                 <input
                   type="color"
                   value={widgetColor}
@@ -254,12 +251,12 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
                       key={color}
                       type="button"
                       onClick={() => setWidgetColor(color)}
-                      className="w-6 h-6 rounded-full border transition-transform hover:scale-110 cursor-pointer"
+                      className="w-6 h-6 rounded-full border transition-transform hover:scale-110 cursor-pointer text-[#0f0f15] dark:text-white"
                       style={{
                         backgroundColor: color,
                         borderColor:
                           widgetColor.toLowerCase() === color.toLowerCase()
-                            ? "white"
+                            ? "currentColor"
                             : "transparent",
                       }}
                     />
@@ -269,7 +266,7 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
                 Welcome Response Prompt
               </label>
               <input

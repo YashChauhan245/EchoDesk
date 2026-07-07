@@ -401,6 +401,47 @@
           bottom: 80px;
         }
       }
+
+      /* Dark mode styles */
+      .echodesk-dark .echodesk-window {
+        background: #0c0c14;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06);
+      }
+      .echodesk-dark .echodesk-messages {
+        background: #08080d;
+      }
+      .echodesk-dark .echodesk-msg-assistant {
+        background: #131320;
+        color: #f8fafc;
+        border-color: rgba(255,255,255,0.04);
+      }
+      .echodesk-dark .echodesk-typing {
+        background: #131320;
+        border-color: rgba(255,255,255,0.04);
+      }
+      .echodesk-dark .echodesk-input-area {
+        background: #0c0c14;
+        border-top-color: rgba(255,255,255,0.06);
+      }
+      .echodesk-dark .echodesk-input {
+        background: #08080d;
+        color: #f8fafc;
+        border-color: rgba(255,255,255,0.08);
+      }
+      .echodesk-dark .echodesk-input:focus {
+        background: #0d0d18;
+      }
+      .echodesk-dark .echodesk-input::placeholder {
+        color: #5f6368;
+      }
+      .echodesk-dark .echodesk-powered {
+        background: #0c0c14;
+        border-top-color: rgba(255,255,255,0.06);
+        color: #5f6368;
+      }
+      .echodesk-dark .echodesk-powered a {
+        color: #94a3b8;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -480,6 +521,33 @@
     if (welcomeMessage) {
       addMessage("assistant", welcomeMessage);
     }
+
+    // Theme Polling
+    function checkTheme() {
+      var isDark = false;
+      try {
+        if (window.parent && window.parent.document && window.parent.document.documentElement) {
+          isDark = window.parent.document.documentElement.classList.contains("dark");
+        }
+      } catch (_) {}
+      
+      if (!isDark) {
+        isDark = document.documentElement.classList.contains("dark") || 
+                 localStorage.getItem("theme") === "dark";
+      }
+
+      var widgetContainer = document.getElementById("echodesk-widget");
+      if (widgetContainer) {
+        if (isDark) {
+          widgetContainer.classList.add("echodesk-dark");
+        } else {
+          widgetContainer.classList.remove("echodesk-dark");
+        }
+      }
+    }
+    
+    checkTheme();
+    setInterval(checkTheme, 500);
   }
 
   // ---- Toggle / Open / Close ----

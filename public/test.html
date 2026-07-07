@@ -80,6 +80,41 @@
       color: #999;
       font-size: 13px;
     }
+    
+    /* Dark mode storefront styling */
+    html.dark body {
+      background: #08080d;
+      color: #94a3b8;
+    }
+    html.dark header {
+      background: #0c0c14;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: none;
+    }
+    html.dark header h1 {
+      color: #f8fafc;
+    }
+    html.dark nav a {
+      color: #94a3b8;
+    }
+    html.dark nav a:hover {
+      color: #f8fafc;
+    }
+    html.dark .card {
+      background: #0c0c14;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: none;
+    }
+    html.dark .card h3 {
+      color: #f8fafc;
+    }
+    html.dark .card p {
+      color: #94a3b8;
+    }
+    html.dark .card[style*="background"] {
+      background: #111827 !important;
+      border-left-color: #6366f1 !important;
+    }
   </style>
 </head>
 <body>
@@ -136,6 +171,22 @@
     chatScript.src = window.location.origin + '/chatbot.js';
     chatScript.setAttribute('data-org-id', orgId);
     document.body.appendChild(chatScript);
+
+    // Sync theme with parent
+    function checkParentTheme() {
+      try {
+        if (window.parent && window.parent.document && window.parent.document.documentElement) {
+          var isDark = window.parent.document.documentElement.classList.contains("dark");
+          if (isDark) {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        }
+      } catch (_) {}
+    }
+    checkParentTheme();
+    setInterval(checkParentTheme, 500);
   </script>
 </body>
 </html>

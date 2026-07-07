@@ -20,7 +20,7 @@ export default async function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-[#030307]">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#f8fafc] dark:bg-[#030307] grid-bg">
       {/* Client-side navigation & mobile drawer */}
       <SidebarNav session={clientSession} />
 
