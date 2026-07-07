@@ -147,8 +147,9 @@ Instructions:
           break;
         }
       } catch (err) {
-        console.warn(`Model ${model} failed:`, err.message || err);
-        lastError = err;
+        const errMsg = err instanceof Error ? err.message : String(err);
+        console.warn(`Model ${model} failed:`, errMsg);
+        lastError = err instanceof Error ? err : new Error(errMsg);
       }
     }
 

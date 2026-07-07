@@ -8,14 +8,15 @@ export default function LoginPage() {
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#6366f1]/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-[420px] relative z-10 animate-fade-in">
-        {/* Logo */}
-        <Link href="/" className="flex items-center justify-center gap-2.5 mb-8 group">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#c084fc] to-[#6366f1] flex items-center justify-center shadow-lg shadow-[#6366f1]/20 group-hover:scale-105 transition-transform duration-200">
-            <MessageSquare className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
+        <Link href="/" className="flex items-center justify-center mb-6">
+          <div className="w-56 h-14 overflow-hidden flex items-center justify-center relative">
+            <img 
+              src="/logo.png" 
+              alt="EchoDesk Logo" 
+              className="w-full h-full object-contain" 
+              style={{ filter: "invert(1) hue-rotate(180deg)", transform: "scale(4.0) translateY(1.5px)" }}
+            />
           </div>
-          <span className="text-xl font-bold tracking-tight text-white">
-            EchoDesk
-          </span>
         </Link>
 
         {/* Login Card */}

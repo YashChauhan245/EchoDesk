@@ -52,14 +52,16 @@ export default function SidebarNav({ session }: SidebarNavProps) {
   const sidebarContent = (
     <div className="flex flex-col h-full bg-[#08080d] border-r border-white/[0.04]">
       {/* Logo */}
-      <div className="p-5 border-b border-white/[0.04] flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#c084fc] to-[#6366f1] flex items-center justify-center shadow-lg shadow-[#6366f1]/20 group-hover:scale-105 transition-transform duration-200">
-            <MessageSquare className="w-4 h-4 text-white" strokeWidth={2.5} />
+      <div className="p-4 border-b border-white/[0.04] flex items-center justify-between">
+        <Link href="/" className="flex items-center">
+          <div className="w-40 h-10 overflow-hidden flex items-center justify-center relative">
+            <img 
+              src="/logo.png" 
+              alt="EchoDesk Logo" 
+              className="w-full h-full object-contain" 
+              style={{ filter: "invert(1) hue-rotate(180deg)", transform: "scale(4.0) translateY(1.5px)" }}
+            />
           </div>
-          <span className="text-sm font-semibold tracking-tight text-white group-hover:text-white transition-colors">
-            EchoDesk
-          </span>
         </Link>
         {isOpen && (
           <button 
@@ -133,13 +135,15 @@ export default function SidebarNav({ session }: SidebarNavProps) {
     <>
       {/* Mobile Top Header */}
       <header className="lg:hidden fixed top-0 w-full z-40 border-b border-white/[0.04] bg-[#030307]/80 backdrop-blur-xl h-14 flex items-center justify-between px-4">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#c084fc] to-[#6366f1] flex items-center justify-center">
-            <MessageSquare className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+        <Link href="/dashboard" className="flex items-center">
+          <div className="w-32 h-10 overflow-hidden flex items-center justify-center relative">
+            <img 
+              src="/logo.png" 
+              alt="EchoDesk Logo" 
+              className="w-full h-full object-contain" 
+              style={{ filter: "invert(1) hue-rotate(180deg)", transform: "scale(4.0) translateY(1.5px)" }}
+            />
           </div>
-          <span className="text-sm font-semibold tracking-tight text-white">
-            EchoDesk
-          </span>
         </Link>
         <button
           onClick={() => setIsOpen(true)}

@@ -95,13 +95,15 @@ export default function LandingPage() {
       {/* ---- Navigation ---- */}
       <nav className="fixed top-0 w-full z-50 border-b border-white/[0.05] bg-[#030307]/75 backdrop-blur-xl transition-all duration-300">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#c084fc] to-[#6366f1] flex items-center justify-center shadow-lg shadow-[#6366f1]/20 group-hover:scale-105 transition-transform duration-200">
-              <MessageSquare className="w-4 h-4 text-white" strokeWidth={2.5} />
+          <Link href="/" className="flex items-center">
+            <div className="w-48 h-12 overflow-hidden flex items-center justify-center relative">
+              <img 
+                src="/logo.png" 
+                alt="EchoDesk Logo" 
+                className="w-full h-full object-contain" 
+                style={{ filter: "invert(1) hue-rotate(180deg)", transform: "scale(4.0) translateY(1.5px)" }}
+              />
             </div>
-            <span className="text-lg font-semibold tracking-tight text-[#f8fafc] group-hover:text-white transition-colors">
-              EchoDesk
-            </span>
           </Link>
 
           <div className="flex items-center gap-6">
@@ -456,11 +458,15 @@ export default function LandingPage() {
       {/* ---- Footer ---- */}
       <footer className="py-12 px-6 border-t border-white/[0.03] text-xs text-[#475569]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-[#c084fc] to-[#6366f1] flex items-center justify-center">
-              <MessageSquare className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+          <div className="flex items-center">
+            <div className="w-36 h-10 overflow-hidden flex items-center justify-center relative">
+              <img 
+                src="/logo.png" 
+                alt="EchoDesk Logo" 
+                className="w-full h-full object-contain" 
+                style={{ filter: "invert(1) hue-rotate(180deg)", transform: "scale(4.0) translateY(1.5px)" }}
+              />
             </div>
-            <span className="font-semibold text-white">EchoDesk</span>
           </div>
           
           <div className="flex items-center gap-6">
