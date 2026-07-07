@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Website — EchoDesk Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    header {
+      background: white;
+      padding: 16px 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 {
+      font-size: 20px;
+      color: #1a1a1a;
+    }
+    nav a {
+      margin-left: 24px;
+      text-decoration: none;
+      color: #666;
+      font-size: 14px;
+    }
+    nav a:hover {
+      color: #333;
+    }
+    .hero {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 80px 32px;
+      text-align: center;
+    }
+    .hero h2 {
+      font-size: 36px;
+      margin-bottom: 16px;
+    }
+    .hero p {
+      font-size: 18px;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .content {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 32px;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .card h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+    .card p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: #999;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🏪 My Awesome Store</h1>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Products</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <h2>Welcome to Our Store</h2>
+    <p>Discover amazing products at great prices. Need help? Chat with our AI assistant using the bubble in the bottom-right corner!</p>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <h3>📱 Latest Smartphones</h3>
+      <p>Check out our collection of the latest smartphones from top brands. We carry iPhone, Samsung Galaxy, OnePlus, and more.</p>
+    </div>
+    <div class="card">
+      <h3>💻 Premium Laptops</h3>
+      <p>From MacBooks to Dell XPS, find the perfect laptop for work, school, or gaming. Expert advice available.</p>
+    </div>
+    <div class="card">
+      <h3>🎧 Accessories</h3>
+      <p>Complete your setup with our range of accessories — cases, chargers, earphones, and more.</p>
+    </div>
+    <div class="card" style="background: #f0f4ff; border-left: 4px solid #667eea;">
+      <h3>💬 Need Help?</h3>
+      <p>Click the chat bubble in the bottom-right corner to talk to our AI assistant. It knows about our products, policies, and can answer your questions instantly!</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 My Awesome Store. This is a test page for EchoDesk chatbot.</p>
+  </footer>
+
+  <!-- 
+    EchoDesk Chatbot Embed Script
+    The orgId is read from the URL query parameter for preview purposes.
+    In production, you'd hardcode your org ID here.
+  -->
+  <script>
+    // Read orgId from URL params (for preview page) or use a default
+    var params = new URLSearchParams(window.location.search);
+    var orgId = params.get('orgId') || 'demo_org';
+    
+    // Dynamically create the chatbot script with the correct orgId
+    var chatScript = document.createElement('script');
+    chatScript.src = window.location.origin + '/chatbot.js';
+    chatScript.setAttribute('data-org-id', orgId);
+    document.body.appendChild(chatScript);
+  </script>
+</body>
+</html>
