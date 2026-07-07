@@ -394,6 +394,13 @@
           height: 56px;
         }
       }
+
+      @media (max-height: 660px) {
+        .echodesk-window {
+          height: calc(100vh - 120px);
+          bottom: 80px;
+        }
+      }
     `;
     document.head.appendChild(style);
   }

@@ -22,12 +22,35 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import fs from 'fs';
+import path from 'path';
 import dbConnect from '@/lib/db';
 import ChatbotSettings from '@/models/ChatbotSettings';
 import Conversation from '@/models/Conversation';
 
-// Initialize Gemini AI client
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+function getGeminiApiKey(): string {
+  let key = process.env.GEMINI_API_KEY;
+  if (key && key.trim() !== '') {
+    return key;
+  }
+  try {
+    const envPath = path.resolve(process.cwd(), '.env');
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf8');
+      const match = envContent.match(/^GEMINI_API_KEY\s*=\s*(.+)$/m);
+      if (match && match[1]) {
+        let parsedKey = match[1].trim();
+        if ((parsedKey.startsWith('"') && parsedKey.endsWith('"')) || (parsedKey.startsWith("'") && parsedKey.endsWith("'"))) {
+          parsedKey = parsedKey.slice(1, -1);
+        }
+        return parsedKey;
+      }
+    }
+  } catch (err) {
+    console.error("Failed to read .env file directly:", err);
+  }
+  return '';
+}
 
 // CORS headers for cross-origin requests from embedded scripts
 const corsHeaders = {
@@ -120,6 +143,9 @@ Instructions:
     });
 
     // --- Call Gemini AI with Fallback Chain ---
+    const apiKey = getGeminiApiKey();
+    const ai = new GoogleGenAI({ apiKey });
+
     const models = [
       'gemini-2.0-flash',
       'gemini-2.5-flash',

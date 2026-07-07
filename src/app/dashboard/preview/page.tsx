@@ -56,7 +56,7 @@ export default async function PreviewPage() {
         <div className="bg-white relative">
           <iframe
             src={`${appUrl}/test.html?orgId=${session.organizationId}`}
-            className="w-full h-[580px]"
+            className="w-full h-[660px]"
             title="Chatbot Sandbox Frame"
           />
         </div>
