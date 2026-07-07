@@ -119,19 +119,44 @@ Instructions:
       parts: [{ text: message.trim() }],
     });
 
-    // --- Call Gemini AI ---
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: contents,
-      config: {
-        systemInstruction: systemPrompt,
-        maxOutputTokens: 1024,
-        temperature: 0.7,
-      },
-    });
+    // --- Call Gemini AI with Fallback Chain ---
+    const models = [
+      'gemini-2.0-flash',
+      'gemini-2.5-flash',
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
+      'gemini-2.0-flash-exp'
+    ];
+    let response = null;
+    let lastError = null;
 
-    const aiResponse =
-      response.text || "I'm sorry, I couldn't generate a response. Please try again.";
+    for (const model of models) {
+      try {
+        console.log(`Attempting chat generation using model: ${model}`);
+        response = await ai.models.generateContent({
+          model: model,
+          contents: contents,
+          config: {
+            systemInstruction: systemPrompt,
+            maxOutputTokens: 1024,
+            temperature: 0.7,
+          },
+        });
+        if (response && response.text) {
+          console.log(`Generation succeeded with model: ${model}`);
+          break;
+        }
+      } catch (err) {
+        console.warn(`Model ${model} failed:`, err.message || err);
+        lastError = err;
+      }
+    }
+
+    if (!response || !response.text) {
+      throw lastError || new Error("All Gemini models in fallback chain failed to respond");
+    }
+
+    const aiResponse = response.text;
 
     // --- Save conversation ---
     if (!conversation) {
