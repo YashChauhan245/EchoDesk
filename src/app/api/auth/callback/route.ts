@@ -28,13 +28,13 @@ export async function GET(request: NextRequest) {
   if (error) {
     console.error('Auth callback error:', error, errorDescription);
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(error)}`, process.env.NEXT_PUBLIC_APP_URL!)
+      new URL(`/?error=${encodeURIComponent(error)}`, process.env.NEXT_PUBLIC_APP_URL!)
     );
   }
 
   if (!code) {
     return NextResponse.redirect(
-      new URL('/login?error=no_code', process.env.NEXT_PUBLIC_APP_URL!)
+      new URL('/?error=no_code', process.env.NEXT_PUBLIC_APP_URL!)
     );
   }
 
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error('Auth callback processing error:', err);
     return NextResponse.redirect(
-      new URL('/login?error=callback_failed', process.env.NEXT_PUBLIC_APP_URL!)
+      new URL('/?error=callback_failed', process.env.NEXT_PUBLIC_APP_URL!)
     );
   }
 }

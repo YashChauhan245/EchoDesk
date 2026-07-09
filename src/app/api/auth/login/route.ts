@@ -36,7 +36,7 @@ export async function GET() {
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.redirect(
-      new URL('/login?error=auth_failed', process.env.NEXT_PUBLIC_APP_URL!)
+      new URL('/?error=auth_failed', process.env.NEXT_PUBLIC_APP_URL!)
     );
   }
 }

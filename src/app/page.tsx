@@ -109,16 +109,16 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-6">
             <ThemeToggle />
-            <Link
-              href="/login"
+            <a
+              href="/api/auth/login"
               className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors"
             >
               Sign in
-            </Link>
-            <Link href="/login" className="btn-primary !py-2 !px-4 !text-sm">
+            </a>
+            <a href="/api/auth/login" className="btn-primary !py-2 !px-4 !text-sm">
               Get Started
               <ChevronRight className="w-4 h-4" />
-            </Link>
+            </a>
           </div>
         </div>
       </nav>
@@ -156,10 +156,10 @@ export default function LandingPage() {
 
             {/* Actions */}
             <div className="flex flex-wrap items-center gap-4 mb-10 w-full sm:w-auto animate-slide-up">
-              <Link href="/login" className="btn-primary !py-3 !px-6 !text-sm group">
+              <a href="/api/auth/login" className="btn-primary !py-3 !px-6 !text-sm group">
                 Start Building Free
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              </a>
               <a href="#features" className="btn-secondary !py-3 !px-6 !text-sm">
                 Explore Features
               </a>
@@ -444,10 +444,10 @@ export default function LandingPage() {
               <p className="text-[#5f6368] dark:text-[#94a3b8] mb-8 text-sm sm:text-base leading-relaxed">
                 Unlock instant AI support with secure organizational logic. Sign up via Scalekit today.
               </p>
-              <Link href="/login" className="btn-primary !py-3.5 !px-8 !text-sm group">
+              <a href="/api/auth/login" className="btn-primary !py-3.5 !px-8 !text-sm group">
                 Get Started Free
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              </a>
             </div>
           </div>
         </div>

@@ -53,9 +53,8 @@ export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get('echodesk_session');
 
   if (!sessionCookie?.value) {
-    // No session → redirect to login
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('callbackUrl', pathname);
+    // No session → redirect directly to Scalekit SSO
+    const loginUrl = new URL('/api/auth/login', request.url);
     return NextResponse.redirect(loginUrl);
   }
 
