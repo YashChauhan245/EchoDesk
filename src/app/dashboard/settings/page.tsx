@@ -16,7 +16,11 @@ import {
   ArrowLeft,
   Bot,
   Copy,
-  Check
+  Check,
+  Upload,
+  Globe,
+  FileText,
+  Link as LinkIcon
 } from "lucide-react";
 import type { IChatbotSettings, ISubscription } from "@/types";
 
@@ -47,6 +51,108 @@ export default function SettingsPage() {
   const [welcomeMessage, setWelcomeMessage] = useState(
     "Hi there! 👋 How can I help you today?"
   );
+
+  // Scraper states
+  const [activeImportTab, setActiveImportTab] = useState<"file" | "url">("file");
+  const [scrapeUrl, setScrapeUrl] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
+
+  // Auto-dismiss import toast alerts
+  useEffect(() => {
+    if (importError || importSuccess) {
+      const timer = setTimeout(() => {
+        setImportError(null);
+        setImportSuccess(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [importError, importSuccess]);
+
+  // File Upload Scraper Handler
+  async function handleFileImport(e: React.MouseEvent) {
+    e.preventDefault();
+    if (!selectedFile) return;
+
+    setImporting(true);
+    setImportError(null);
+    setImportSuccess(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const res = await fetch("/api/scrape/file", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to parse file");
+      }
+
+      const textHeader = `\n\n=== IMPORTED FROM FILE: ${data.fileName} ===\n${data.text}\n=== END IMPORT ===\n`;
+      
+      // Enforce total limit on client side
+      if ((knowledgeBase + textHeader).length > 50000) {
+        throw new Error("Importing this file would exceed the 50,000 character limit.");
+      }
+
+      setKnowledgeBase((prev) => prev + textHeader);
+      setImportSuccess(`Successfully imported text from ${data.fileName}!`);
+      setSelectedFile(null);
+
+      // Reset file input element visually
+      const fileInput = document.getElementById("file-uploader-input") as HTMLInputElement;
+      if (fileInput) fileInput.value = "";
+    } catch (err: any) {
+      setImportError(err.message || "Failed to process document upload.");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  // URL Scraper Handler
+  async function handleUrlScrape(e: React.MouseEvent) {
+    e.preventDefault();
+    if (!scrapeUrl || !scrapeUrl.trim()) return;
+
+    setImporting(true);
+    setImportError(null);
+    setImportSuccess(null);
+
+    try {
+      const res = await fetch("/api/scrape/url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: scrapeUrl.trim() }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to scrape URL");
+      }
+
+      const textHeader = `\n\n=== SCRAPED FROM URL: ${scrapeUrl.trim()} ===\n${data.text}\n=== END SCRAPE ===\n`;
+
+      if ((knowledgeBase + textHeader).length > 50000) {
+        throw new Error("Scraping this website would exceed the 50,000 character limit.");
+      }
+
+      setKnowledgeBase((prev) => prev + textHeader);
+      setImportSuccess(`Successfully scraped text content from host!`);
+      setScrapeUrl("");
+    } catch (err: any) {
+      setImportError(err.message || "Failed to process website scraping.");
+    } finally {
+      setImporting(false);
+    }
+  }
 
   // Load app URL on mount
   useEffect(() => {
@@ -435,6 +541,120 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
               <span className={`text-[10px] ${knowledgeBase.length > 45000 ? "text-amber-500 font-semibold" : "text-[#5f6368] dark:text-[#94a3b8]"}`}>
                 {knowledgeBase.length.toLocaleString()} / 50,000 characters
               </span>
+            </div>
+
+            {/* Smart Import Sources Sub-section */}
+            <div className="mt-6 pt-6 border-t border-black/[0.05] dark:border-white/[0.05]">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#0f0f15] dark:text-white mb-1">
+                Smart Import Tools
+              </h3>
+              <p className="text-[11px] text-[#5f6368] dark:text-[#94a3b8] mb-4">
+                Fast-track training by uploading business documents or scraping public website content.
+              </p>
+
+              {/* Scraper Tab Selectors */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveImportTab('file')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                    activeImportTab === 'file'
+                      ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
+                      : 'bg-transparent text-[#5f6368] dark:text-[#94a3b8] border-black/[0.08] dark:border-white/[0.08] hover:bg-neutral-50 dark:hover:bg-white/[0.02]'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  Upload Document (PDF / TXT)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveImportTab('url')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                    activeImportTab === 'url'
+                      ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
+                      : 'bg-transparent text-[#5f6368] dark:text-[#94a3b8] border-black/[0.08] dark:border-white/[0.08] hover:bg-neutral-50 dark:hover:bg-white/[0.02]'
+                  }`}
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  Scrape Web Link
+                </button>
+              </div>
+
+              {/* Import status messages */}
+              {importError && (
+                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-[11px] rounded-lg flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{importError}</span>
+                </div>
+              )}
+              {importSuccess && (
+                <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] rounded-lg flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                  <span>{importSuccess}</span>
+                </div>
+              )}
+
+              {/* Tab Content */}
+              {activeImportTab === 'file' ? (
+                <div className="bg-neutral-50 dark:bg-white/[0.01] border border-dashed border-black/[0.08] dark:border-white/[0.08] rounded-xl p-5 text-center flex flex-col items-center justify-center gap-3">
+                  <Upload className="w-8 h-8 text-[#5f6368] dark:text-[#475569]" />
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-[#0f0f15] dark:text-white">
+                      {selectedFile ? selectedFile.name : "Select or Drop a Document"}
+                    </p>
+                    <p className="text-[10px] text-[#5f6368] dark:text-[#94a3b8]">
+                      Supports PDF or Plain Text (.txt) up to 2MB
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <label className="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-xs font-semibold text-[#0f0f15] dark:text-white hover:bg-neutral-100 dark:hover:bg-white/[0.02] transition-colors cursor-pointer">
+                      Browse File
+                      <input
+                        id="file-uploader-input"
+                        type="file"
+                        accept=".pdf,.txt"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            setSelectedFile(e.target.files[0]);
+                          }
+                        }}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      disabled={!selectedFile || importing}
+                      onClick={handleFileImport}
+                      className="px-3 py-1.5 rounded-lg bg-[#6366f1] text-white text-xs font-semibold hover:bg-[#5356e3] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+                    >
+                      {importing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                      {importing ? "Parsing..." : "Import Text"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-neutral-50 dark:bg-white/[0.01] border border-black/[0.08] dark:border-white/[0.08] rounded-xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="flex-1 relative flex items-center">
+                    <LinkIcon className="absolute left-3 w-4 h-4 text-[#5f6368] dark:text-[#475569]" />
+                    <input
+                      type="url"
+                      value={scrapeUrl}
+                      onChange={(e) => setScrapeUrl(e.target.value)}
+                      placeholder="e.g. https://acme.com/about-us"
+                      className="input-field !pl-9"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    disabled={!scrapeUrl.trim() || importing}
+                    onClick={handleUrlScrape}
+                    className="px-4 py-2.5 rounded-xl bg-[#6366f1] text-white text-xs font-semibold hover:bg-[#5356e3] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer flex-shrink-0"
+                  >
+                    {importing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    {importing ? "Scraping..." : "Scrape Link"}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

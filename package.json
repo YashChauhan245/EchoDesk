@@ -11,10 +11,12 @@
   "dependencies": {
     "@google/genai": "^2.10.0",
     "@scalekit-sdk/node": "^2.7.0",
+    "html-to-text": "^10.0.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.23.0",
     "mongoose": "^9.7.4",
     "next": "16.2.10",
+    "pdf-parse": "^2.4.5",
     "razorpay": "^2.9.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/html-to-text": "^9.0.4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
