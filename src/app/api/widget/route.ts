@@ -35,8 +35,19 @@ export async function GET(request: NextRequest) {
 
     await dbConnect();
 
+    // Check if orgId query param is a 24-character hex Mongoose ObjectId (chatbotId)
+    // or a legacy organizationId
+    let query = {};
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(orgId);
+
+    if (isValidObjectId) {
+      query = { _id: orgId };
+    } else {
+      query = { organizationId: orgId };
+    }
+
     const settings = await ChatbotSettings.findOne(
-      { organizationId: orgId },
+      query,
       { businessName: 1, widgetColor: 1, welcomeMessage: 1 } // Project only needed fields
     ).lean();
 

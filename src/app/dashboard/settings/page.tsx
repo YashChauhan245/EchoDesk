@@ -9,18 +9,37 @@ import {
   Loader2, 
   CheckCircle2, 
   AlertCircle,
-  HelpCircle
+  HelpCircle,
+  Plus,
+  Settings,
+  Code,
+  ArrowLeft,
+  Bot,
+  Copy,
+  Check
 } from "lucide-react";
+import type { IChatbotSettings, ISubscription } from "@/types";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [chatbots, setChatbots] = useState<IChatbotSettings[]>([]);
+  const [subscription, setSubscription] = useState<ISubscription | null>(null);
+  
+  // Navigation / View states
+  // "list" | "create" | "edit"
+  const [view, setView] = useState<"list" | "create" | "edit">("list");
+  const [selectedBotId, setSelectedBotId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [appUrl, setAppUrl] = useState("");
+
   const [toast, setToast] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
 
-  // Form state
+  // Form states
+  const [chatbotName, setChatbotName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [email, setEmail] = useState("");
   const [knowledgeBase, setKnowledgeBase] = useState("");
@@ -29,9 +48,10 @@ export default function SettingsPage() {
     "Hi there! 👋 How can I help you today?"
   );
 
-  // Load existing settings on mount
+  // Load app URL on mount
   useEffect(() => {
-    fetchSettings();
+    setAppUrl(window.location.origin);
+    fetchData();
   }, []);
 
   // Auto-dismiss toast
@@ -42,43 +62,70 @@ export default function SettingsPage() {
     }
   }, [toast]);
 
-  async function fetchSettings() {
+  async function fetchData() {
     try {
+      setLoading(true);
       const res = await fetch("/api/settings");
       const data = await res.json();
 
-      if (data.settings) {
-        setBusinessName(data.settings.businessName || "");
-        setEmail(data.settings.email || "");
-        setKnowledgeBase(data.settings.knowledgeBase || "");
-        setWidgetColor(data.settings.widgetColor || "#6366f1");
-        setWelcomeMessage(
-          data.settings.welcomeMessage ||
-            "Hi there! 👋 How can I help you today?"
-        );
+      if (data.chatbots) {
+        setChatbots(data.chatbots);
       }
-    } catch {
-      console.error("Failed to load settings");
+      if (data.subscription) {
+        setSubscription(data.subscription);
+      }
+    } catch (err) {
+      console.error("Failed to load settings data:", err);
     } finally {
       setLoading(false);
     }
   }
 
+  function handleOpenCreate() {
+    setSelectedBotId(null);
+    setChatbotName("");
+    setBusinessName("");
+    setEmail("");
+    setKnowledgeBase("");
+    setWidgetColor("#6366f1");
+    setWelcomeMessage("Hi there! 👋 How can I help you today?");
+    setView("create");
+  }
+
+  function handleOpenConfigure(bot: IChatbotSettings) {
+    setSelectedBotId(bot._id || null);
+    setChatbotName(bot.chatbotName || "My Chatbot");
+    setBusinessName(bot.businessName || "");
+    setEmail(bot.email || "");
+    setKnowledgeBase(bot.knowledgeBase || "");
+    setWidgetColor(bot.widgetColor || "#6366f1");
+    setWelcomeMessage(bot.welcomeMessage || "Hi there! 👋 How can I help you today?");
+    setView("edit");
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setToast(null);
 
     try {
+      const payload: any = {
+        chatbotName,
+        businessName,
+        email,
+        knowledgeBase,
+        widgetColor,
+        welcomeMessage,
+      };
+
+      if (view === "edit" && selectedBotId) {
+        payload.chatbotId = selectedBotId;
+      }
+
       const res = await fetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessName,
-          email,
-          knowledgeBase,
-          widgetColor,
-          welcomeMessage,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -88,6 +135,8 @@ export default function SettingsPage() {
       }
 
       setToast({ type: "success", message: "Settings saved successfully! ✓" });
+      await fetchData();
+      setView("list");
     } catch (err) {
       setToast({
         type: "error",
@@ -97,6 +146,27 @@ export default function SettingsPage() {
       setSaving(false);
     }
   }
+
+  async function handleCopyEmbed(botId: string) {
+    const embedScript = `<!-- EchoDesk AI Chatbot Embed -->\n<script\n  src="${appUrl}/chatbot.js"\n  data-org-id="${botId}"\n></script>`;
+    try {
+      await navigator.clipboard.writeText(embedScript);
+      setCopiedId(botId);
+      setTimeout(() => setCopiedId(null), 3000);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = embedScript;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopiedId(botId);
+      setTimeout(() => setCopiedId(null), 3000);
+    }
+  }
+
+  const maxChatbotsLimit = subscription?.limits?.maxChatbots || 1;
+  const currentChatbotsCount = chatbots.length;
 
   if (loading) {
     return (
@@ -109,198 +179,359 @@ export default function SettingsPage() {
   return (
     <div className="animate-fade-in space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
-          Chatbot Settings
-        </h1>
-        <p className="text-sm text-[#5f6368] dark:text-[#94a3b8]">
-          Configure your AI agent identity, context rules, support instructions, and widget UI design.
-        </p>
-      </div>
-
-      {/* Settings Form */}
-      <form onSubmit={handleSave} className="space-y-6 max-w-3xl">
-        
-        {/* Business Details Section */}
-        <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
-          <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-5 flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
-              <Building className="w-4 h-4" />
-            </div>
-            Business Profile
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
-                Business Name <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="e.g. Acme Corporation"
-                className="input-field"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
-                Support Email <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. support@acme.com"
-                className="input-field"
-                required
-              />
-            </div>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
+            {view === "list"
+              ? "Chatbot Settings"
+              : view === "create"
+              ? "Create Chatbot"
+              : `Configure ${chatbotName}`}
+          </h1>
+          <p className="text-sm text-[#5f6368] dark:text-[#94a3b8]">
+            {view === "list"
+              ? "Create and manage your AI chatbot support agents and retrieve their embed codes."
+              : "Set up details, training facts, and design themes for this specific chatbot."}
+          </p>
         </div>
 
-        {/* Knowledge Base Section */}
-        <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
-                <BookOpen className="w-4 h-4" />
+        {view === "list" ? (
+          <button
+            onClick={handleOpenCreate}
+            disabled={currentChatbotsCount >= maxChatbotsLimit}
+            className={`flex items-center justify-center gap-2 px-5 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm ${
+              currentChatbotsCount >= maxChatbotsLimit
+                ? "bg-neutral-100 dark:bg-white/[0.02] text-neutral-400 dark:text-neutral-600 border border-black/[0.04] dark:border-white/[0.04] cursor-not-allowed"
+                : "btn-primary"
+            }`}
+          >
+            <Plus className="w-4 h-4" />
+            Create Chatbot
+          </button>
+        ) : (
+          <button
+            onClick={() => setView("list")}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold text-[#5f6368] dark:text-[#94a3b8] border border-black/[0.08] dark:border-white/[0.08] hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Chatbots
+          </button>
+        )}
+      </div>
+
+      {/* Main content conditional rendering */}
+      {view === "list" ? (
+        <div className="space-y-6">
+          {/* Usage Tracker Banner */}
+          <div className="glass-card p-5 border border-[#6366f1]/20 bg-[#6366f1]/5 dark:bg-[#6366f1]/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-4xl rounded-2xl">
+            <div className="flex items-center gap-3">
+              <Bot className="w-5 h-5 text-[#6366f1]" />
+              <div>
+                <p className="text-xs font-semibold text-[#0f0f15] dark:text-white">
+                  Chatbot Limit Usage
+                </p>
+                <p className="text-[10px] text-[#5f6368] dark:text-[#94a3b8]">
+                  Plan: <span className="font-bold text-[#6366f1]">{subscription?.plan || "FREE"}</span> Tier
+                </p>
               </div>
-              Knowledge Base Training Context
-            </h2>
-            <div className="group relative">
-              <HelpCircle className="w-4 h-4 text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white cursor-pointer" />
-              <div className="absolute right-0 bottom-full mb-2 w-72 p-3 bg-black border border-black rounded-lg text-[10px] text-white leading-relaxed shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20">
-                Provide detailed paragraphs, FAQs, rules, and links. The Gemini model uses this data exclusively to build responses.
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <span className="text-xs font-extrabold text-[#0f0f15] dark:text-white">
+                  {currentChatbotsCount}
+                </span>
+                <span className="text-[10px] text-[#5f6368] dark:text-[#94a3b8]">
+                  {" "}
+                  / {maxChatbotsLimit} Chatbots
+                </span>
+              </div>
+              <div className="w-32 bg-black/10 dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className="bg-[#6366f1] h-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, (currentChatbotsCount / maxChatbotsLimit) * 100)}%` }}
+                />
               </div>
             </div>
           </div>
-          <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] mb-5 leading-relaxed">
-            Enter all core facts, business details, operating hours, policies, and FAQs the AI agent needs to formulate support replies.
-          </p>
 
-          <textarea
-            value={knowledgeBase}
-            onChange={(e) => setKnowledgeBase(e.target.value)}
-            placeholder={`Example:
- 
+          {chatbots.length === 0 ? (
+            <div className="glass-card p-12 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] text-center max-w-4xl space-y-4">
+              <Bot className="w-12 h-12 text-[#94a3b8] dark:text-[#475569] mx-auto animate-pulse" />
+              <h3 className="text-sm font-semibold text-[#0f0f15] dark:text-white">No chatbots created</h3>
+              <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] max-w-sm mx-auto leading-relaxed">
+                Configure your first AI customer assistant to get embed scripts and start training your AI agents.
+              </p>
+              <button
+                onClick={handleOpenCreate}
+                className="btn-primary !py-2.5 !px-5 text-xs inline-flex items-center gap-2 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" /> Add Chatbot
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 max-w-4xl">
+              {chatbots.map((bot) => (
+                <div
+                  key={bot._id}
+                  className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-black/10 dark:hover:border-white/10 transition-all duration-200"
+                >
+                  <div className="space-y-3.5">
+                    {/* Bot Title & Name */}
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-4 h-4 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: bot.widgetColor || "#6366f1" }}
+                      />
+                      <div>
+                        <h3 className="text-sm font-bold text-[#0f0f15] dark:text-white">
+                          {bot.chatbotName || "Chatbot Agent"}
+                        </h3>
+                        <p className="text-[10px] text-[#5f6368] dark:text-[#94a3b8]">
+                          Business: {bot.businessName} • Email: {bot.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Compact Code Block Preview */}
+                    <div className="flex items-center gap-2 bg-neutral-50 dark:bg-white/[0.01] p-3 rounded-lg border border-black/[0.04] dark:border-white/[0.06] font-mono text-[10px] max-w-lg select-all">
+                      <code className="text-neutral-800 dark:text-neutral-300 truncate block">
+                        {`<script src="${appUrl}/chatbot.js" data-org-id="${bot._id}"></script>`}
+                      </code>
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <button
+                      onClick={() => handleCopyEmbed(bot._id || "")}
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#5f6368] dark:text-[#94a3b8] border border-black/[0.08] dark:border-white/[0.08] hover:bg-neutral-50 dark:hover:bg-white/[0.02] cursor-pointer"
+                    >
+                      {copiedId === bot._id ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-500" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          Copy Embed
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => handleOpenConfigure(bot)}
+                      className="btn-primary !py-2 !px-4 text-xs flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Settings className="w-3.5 h-3.5" />
+                      Configure
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <form onSubmit={handleSave} className="space-y-6 max-w-3xl">
+          {/* Chatbot Name and General Details */}
+          <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
+            <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-5 flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
+                <Bot className="w-4 h-4" />
+              </div>
+              Chatbot Profile
+            </h2>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
+                  Chatbot Identifier Name <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={chatbotName}
+                  onChange={(e) => setChatbotName(e.target.value)}
+                  placeholder="e.g. Website Main Support Bot"
+                  className="input-field"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
+                    Business Name <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    placeholder="e.g. Acme Corporation"
+                    className="input-field"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
+                    Support Email <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="e.g. support@acme.com"
+                    className="input-field"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Knowledge Base Section */}
+          <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                Knowledge Base Training Context
+              </h2>
+              <div className="group relative">
+                <HelpCircle className="w-4 h-4 text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white cursor-pointer" />
+                <div className="absolute right-0 bottom-full mb-2 w-72 p-3 bg-black border border-black rounded-lg text-[10px] text-white leading-relaxed shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20">
+                  Provide detailed paragraphs, FAQs, rules, and links. The Gemini model uses this data exclusively to build responses.
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] mb-5 leading-relaxed">
+              Enter all core facts, business details, operating hours, policies, and FAQs the AI agent needs to formulate support replies for this bot.
+            </p>
+
+            <textarea
+              value={knowledgeBase}
+              onChange={(e) => setKnowledgeBase(e.target.value)}
+              placeholder={`Example:
+  
 You are an AI support assistant for Acme Corporation.
- 
+  
 Company Details:
 Acme Corporation offers premium cloud services.
 Operating hours: 24/7.
 Refund Policy: Refund request is eligible within 14 days of subscription activation.
- 
+  
 FAQs:
 Q: Do you support Single Sign-On (SSO)?
 A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
-            className="textarea-field !min-h-[300px] font-sans leading-relaxed text-xs"
-            required
-          />
+              className="textarea-field !min-h-[250px] font-sans leading-relaxed text-xs"
+              required
+            />
 
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-[10px] text-[#5f6368] dark:text-[#94a3b8]">Supports Markdown format</span>
-            <span className={`text-[10px] ${knowledgeBase.length > 45000 ? "text-amber-500 font-semibold" : "text-[#5f6368] dark:text-[#94a3b8]"}`}>
-              {knowledgeBase.length.toLocaleString()} / 50,000 characters
-            </span>
-          </div>
-        </div>
-
-        {/* Widget Appearance Section */}
-        <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
-          <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-5 flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
-              <Palette className="w-4 h-4" />
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-[10px] text-[#5f6368] dark:text-[#94a3b8]">Supports Markdown format</span>
+              <span className={`text-[10px] ${knowledgeBase.length > 45000 ? "text-amber-500 font-semibold" : "text-[#5f6368] dark:text-[#94a3b8]"}`}>
+                {knowledgeBase.length.toLocaleString()} / 50,000 characters
+              </span>
             </div>
-            Widget Appearance
-          </h2>
+          </div>
 
-          <div className="space-y-5">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
-                Brand Accent Color
-              </label>
-              <div className="flex flex-wrap items-center gap-3 bg-neutral-50 dark:bg-white/[0.02] p-3 rounded-lg border border-black/[0.04] dark:border-white/[0.06]">
-                <input
-                  type="color"
-                  value={widgetColor}
-                  onChange={(e) => setWidgetColor(e.target.value)}
-                  className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent"
-                />
-                <input
-                  type="text"
-                  value={widgetColor}
-                  onChange={(e) => setWidgetColor(e.target.value)}
-                  className="input-field !w-28 font-mono text-xs text-center !py-1.5"
-                />
-                
-                {/* Color presets */}
-                <div className="flex flex-wrap gap-2 ml-2">
-                  {[
-                    "#6366f1",
-                    "#8b5cf6",
-                    "#06b6d4",
-                    "#10b981",
-                    "#f59e0b",
-                    "#ef4444",
-                    "#ec4899",
-                  ].map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setWidgetColor(color)}
-                      className="w-6 h-6 rounded-full border transition-transform hover:scale-110 cursor-pointer text-[#0f0f15] dark:text-white"
-                      style={{
-                        backgroundColor: color,
-                        borderColor:
-                          widgetColor.toLowerCase() === color.toLowerCase()
-                            ? "currentColor"
-                            : "transparent",
-                      }}
-                    />
-                  ))}
+          {/* Widget Appearance Section */}
+          <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
+            <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-5 flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
+                <Palette className="w-4 h-4" />
+              </div>
+              Widget Appearance
+            </h2>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
+                  Brand Accent Color
+                </label>
+                <div className="flex flex-wrap items-center gap-3 bg-neutral-50 dark:bg-white/[0.02] p-3 rounded-lg border border-black/[0.04] dark:border-white/[0.06]">
+                  <input
+                    type="color"
+                    value={widgetColor}
+                    onChange={(e) => setWidgetColor(e.target.value)}
+                    className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent"
+                  />
+                  <input
+                    type="text"
+                    value={widgetColor}
+                    onChange={(e) => setWidgetColor(e.target.value)}
+                    className="input-field !w-28 font-mono text-xs text-center !py-1.5"
+                  />
+                  
+                  {/* Color presets */}
+                  <div className="flex flex-wrap gap-2 ml-2">
+                    {[
+                      "#6366f1",
+                      "#8b5cf6",
+                      "#06b6d4",
+                      "#10b981",
+                      "#f59e0b",
+                      "#ef4444",
+                      "#ec4899",
+                    ].map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setWidgetColor(color)}
+                        className="w-6 h-6 rounded-full border transition-transform hover:scale-110 cursor-pointer text-[#0f0f15] dark:text-white"
+                        style={{
+                          backgroundColor: color,
+                          borderColor:
+                            widgetColor.toLowerCase() === color.toLowerCase()
+                              ? "currentColor"
+                              : "transparent",
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
-                Welcome Response Prompt
-              </label>
-              <input
-                type="text"
-                value={welcomeMessage}
-                onChange={(e) => setWelcomeMessage(e.target.value)}
-                placeholder="Hi there! 👋 How can I help you today?"
-                className="input-field"
-              />
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#475569] dark:text-[#94a3b8] mb-2">
+                  Welcome Response Prompt
+                </label>
+                <input
+                  type="text"
+                  value={welcomeMessage}
+                  onChange={(e) => setWelcomeMessage(e.target.value)}
+                  placeholder="Hi there! 👋 How can I help you today?"
+                  className="input-field"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Save Button */}
-        <div className="flex items-center gap-4 pt-2">
-          <button
-            type="submit"
-            disabled={saving}
-            className="btn-primary !py-3 !px-8 text-xs font-semibold uppercase tracking-wider cursor-pointer"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Saving Changes...
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                Save Configurations
-              </>
-            )}
-          </button>
-        </div>
-      </form>
+          {/* Save Button */}
+          <div className="flex items-center gap-4 pt-2">
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn-primary !py-3 !px-8 text-xs font-semibold uppercase tracking-wider cursor-pointer"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-full animate-spin" />
+                  Saving Chatbot...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  {view === "create" ? "Create Chatbot" : "Save Configurations"}
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* Toast Notification */}
       {toast && (

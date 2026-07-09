@@ -12,7 +12,8 @@ import {
   Menu, 
   X, 
   MessageSquare,
-  Bot
+  Bot,
+  CreditCard
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -47,6 +48,11 @@ export default function SidebarNav({ session }: SidebarNavProps) {
       href: "/dashboard/preview",
       label: "Live Preview",
       icon: Eye,
+    },
+    {
+      href: "/dashboard/pricing",
+      label: "Billing & Plans",
+      icon: CreditCard,
     },
   ];
 

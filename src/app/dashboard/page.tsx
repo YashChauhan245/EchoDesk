@@ -2,6 +2,7 @@ import { getSession } from "@/lib/session";
 import dbConnect from "@/lib/db";
 import ChatbotSettings from "@/models/ChatbotSettings";
 import Conversation from "@/models/Conversation";
+import Subscription from "@/models/Subscription";
 import Link from "next/link";
 import { 
   Bot, 
@@ -12,7 +13,8 @@ import {
   ChevronRight,
   TrendingUp,
   Activity,
-  ArrowUpRight
+  ArrowUpRight,
+  CreditCard
 } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -29,6 +31,38 @@ export default async function DashboardPage() {
   const conversationCount = await Conversation.countDocuments({
     organizationId: session.organizationId,
   });
+
+  // Fetch or mock subscription details
+  let subscription = await Subscription.findOne({
+    organizationId: session.organizationId,
+  }).lean() as any;
+
+  const chatbotsCreated = await ChatbotSettings.countDocuments({
+    organizationId: session.organizationId,
+  });
+
+  if (!subscription) {
+    subscription = {
+      plan: "FREE",
+      status: "active",
+      limits: {
+        maxChatbots: 1,
+        maxWebsites: 1,
+        maxMessages: 500,
+      },
+      usage: {
+        messagesUsed: 0,
+        chatbotsCreated: chatbotsCreated,
+      },
+    } as any;
+  } else if (subscription.usage?.chatbotsCreated !== chatbotsCreated) {
+    // Sync the cache in subscription document
+    await Subscription.updateOne(
+      { organizationId: session.organizationId },
+      { $set: { "usage.chatbotsCreated": chatbotsCreated } }
+    );
+    subscription.usage.chatbotsCreated = chatbotsCreated;
+  }
 
   const isConfigured = !!settings;
 
@@ -49,7 +83,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Chatbot Status */}
         <div className="glass-card p-6 relative group border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm">
@@ -111,6 +145,73 @@ export default async function DashboardPage() {
           <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] leading-relaxed">
             Secure multi-tenant environment identifier
           </p>
+        </div>
+
+        {/* Subscription & Usage Card */}
+        <div className="glass-card p-6 relative group border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-semibold uppercase tracking-widest text-[#5f6368] dark:text-[#94a3b8]">
+                Subscription Plan
+              </span>
+              <div className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                subscription.plan === "PRO" 
+                  ? "bg-[#6366f1]/10 text-[#6366f1] border border-[#6366f1]/20" 
+                  : subscription.plan === "STARTER"
+                    ? "bg-blue-500/10 text-blue-500 border border-blue-500/20"
+                    : "bg-neutral-500/10 text-neutral-500 border border-neutral-500/20"
+              }`}>
+                {subscription.plan}
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Messages Usage */}
+              <div>
+                <div className="flex items-center justify-between text-[10px] mb-1 font-medium">
+                  <span className="text-[#5f6368] dark:text-[#94a3b8]">AI Messages</span>
+                  <span className="text-[#0f0f15] dark:text-white font-semibold">
+                    {subscription.usage.messagesUsed.toLocaleString()} / {subscription.limits.maxMessages.toLocaleString()}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-neutral-100 dark:bg-white/[0.04] rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-[#6366f1] to-indigo-500 rounded-full"
+                    style={{ width: `${Math.min(100, (subscription.usage.messagesUsed / subscription.limits.maxMessages) * 100)}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Chatbots Usage */}
+              <div>
+                <div className="flex items-center justify-between text-[10px] mb-1 font-medium">
+                  <span className="text-[#5f6368] dark:text-[#94a3b8]">AI Chatbots</span>
+                  <span className="text-[#0f0f15] dark:text-white font-semibold">
+                    {subscription.usage.chatbotsCreated} / {subscription.limits.maxChatbots}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-neutral-100 dark:bg-white/[0.04] rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full"
+                    style={{ width: `${Math.min(100, (subscription.usage.chatbotsCreated / subscription.limits.maxChatbots) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-black/[0.03] dark:border-white/[0.03] flex items-center justify-between">
+            <Link 
+              href="/dashboard/pricing" 
+              className="text-[10px] font-bold text-[#6366f1] dark:text-indigo-400 hover:underline flex items-center gap-0.5"
+            >
+              Plans & Billing
+              <ChevronRight className="w-3 h-3" />
+            </Link>
+            <span className="text-[9px] text-[#5f6368] dark:text-[#475569] capitalize">
+              Status: {subscription.status}
+            </span>
+          </div>
         </div>
 
       </div>

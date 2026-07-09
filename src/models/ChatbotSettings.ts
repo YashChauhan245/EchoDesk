@@ -23,8 +23,14 @@ const ChatbotSettingsSchema = new Schema<IChatbotSettingsDocument>(
     organizationId: {
       type: String,
       required: [true, 'Organization ID is required'],
-      unique: true,
       index: true,
+    },
+    chatbotName: {
+      type: String,
+      required: [true, 'Chatbot name is required'],
+      default: 'My Chatbot',
+      trim: true,
+      maxlength: [100, 'Chatbot name cannot exceed 100 characters'],
     },
     businessName: {
       type: String,

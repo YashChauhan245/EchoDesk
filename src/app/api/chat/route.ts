@@ -27,6 +27,114 @@ import path from 'path';
 import dbConnect from '@/lib/db';
 import ChatbotSettings from '@/models/ChatbotSettings';
 import Conversation from '@/models/Conversation';
+import Subscription from '@/models/Subscription';
+
+// ---- Local Rule-based Knowledge Matcher Fallback ----
+// This ensures the chatbot ALWAYS works and replies using the configured facts,
+// even if the Gemini API key is rate-limited, quota-exhausted, or blocked.
+function localKnowledgeMatcher(message: string, knowledgeBase: string, email: string): string {
+  const query = message.toLowerCase().trim();
+  const queryWords = query.split(/\s+/).filter(w => w.length > 3);
+  
+  if (!knowledgeBase || !knowledgeBase.trim()) {
+    return `I don't have that information. Please contact us directly at ${email} for further assistance.`;
+  }
+
+  const lines = knowledgeBase
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
+  // 1. Check for Q&A pairs (FAQs)
+  const faqs: Array<{ q: string; a: string }> = [];
+  let currentQ = '';
+  let currentA = '';
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.toLowerCase().startsWith('q:') || line.toLowerCase().startsWith('question:')) {
+      if (currentQ && currentA) {
+        faqs.push({ q: currentQ, a: currentA });
+      }
+      currentQ = line.replace(/^(q|question):\s*/i, '').trim();
+      currentA = '';
+    } else if (line.toLowerCase().startsWith('a:') || line.toLowerCase().startsWith('answer:')) {
+      currentA = line.replace(/^(a|answer):\s*/i, '').trim();
+    } else if (currentQ && !currentA) {
+      currentQ += ' ' + line;
+    } else if (currentQ && currentA) {
+      currentA += '\n' + line;
+    }
+  }
+  if (currentQ && currentA) {
+    faqs.push({ q: currentQ, a: currentA });
+  }
+
+  // Find best matching FAQ
+  let bestFaqMatch = null;
+  let maxFaqScore = 0;
+
+  for (const faq of faqs) {
+    let score = 0;
+    const qLower = faq.q.toLowerCase();
+    
+    if (qLower.includes(query) || query.includes(qLower)) {
+      score += 10;
+    }
+    
+    for (const word of queryWords) {
+      if (qLower.includes(word)) {
+        score += 2;
+      }
+    }
+    
+    if (score > maxFaqScore && score > 0) {
+      maxFaqScore = score;
+      bestFaqMatch = faq;
+    }
+  }
+
+  if (bestFaqMatch && maxFaqScore >= 2) {
+    return bestFaqMatch.a;
+  }
+
+  // 2. Check for sentence-level or paragraph-level matches
+  const paragraphs = knowledgeBase
+    .split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(p => p.length > 15);
+
+  let bestParaMatch = '';
+  let maxParaScore = 0;
+
+  for (const para of paragraphs) {
+    let score = 0;
+    const paraLower = para.toLowerCase();
+
+    if (paraLower.includes(query) || query.includes(paraLower)) {
+      score += 5;
+    }
+
+    for (const word of queryWords) {
+      if (paraLower.includes(word)) {
+        score += 1;
+      }
+    }
+
+    if (score > maxParaScore && score > 0) {
+      maxParaScore = score;
+      bestParaMatch = para;
+    }
+  }
+
+  if (bestParaMatch && maxParaScore >= 2) {
+    // Return the matched paragraph/sentence
+    return bestParaMatch;
+  }
+
+  // 3. Fallback suggestion email
+  return `I don't have that information in my knowledge base. Please contact us directly at ${email} for further assistance.`;
+}
 
 function getGeminiApiKey(): string {
   let key = process.env.GEMINI_API_KEY;
@@ -90,13 +198,52 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
+    // Check if the organizationId parameter is a 24-character hex Mongoose ObjectId (chatbotId)
+    // or a legacy organizationId
+    let query = {};
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(organizationId);
+
+    if (isValidObjectId) {
+      query = { _id: organizationId };
+    } else {
+      query = { organizationId };
+    }
+
     // --- Fetch business configuration ---
-    const settings = await ChatbotSettings.findOne({ organizationId }).lean();
+    const settings = await ChatbotSettings.findOne(query).lean();
 
     if (!settings) {
       return NextResponse.json(
         { error: 'Chatbot not configured for this organization' },
         { status: 404, headers: corsHeaders }
+      );
+    }
+
+    const actualOrgId = settings.organizationId;
+
+    // --- Subscription Limit Check ---
+    let subscription = await Subscription.findOne({ organizationId: actualOrgId });
+    if (!subscription) {
+      subscription = await Subscription.create({
+        organizationId: actualOrgId,
+        plan: 'FREE',
+        status: 'active',
+        limits: {
+          maxChatbots: 1,
+          maxWebsites: 1,
+          maxMessages: 500,
+        },
+        usage: {
+          messagesUsed: 0,
+          chatbotsCreated: 1,
+        },
+      });
+    }
+
+    if (subscription.usage.messagesUsed >= subscription.limits.maxMessages) {
+      return NextResponse.json(
+        { response: "Monthly AI message limit reached. Upgrade your plan." },
+        { headers: corsHeaders }
       );
     }
 
@@ -179,11 +326,14 @@ Instructions:
       }
     }
 
-    if (!response || !response.text) {
-      throw lastError || new Error("All Gemini models in fallback chain failed to respond");
-    }
+    let aiResponse = '';
 
-    const aiResponse = response.text;
+    if (response && response.text) {
+      aiResponse = response.text;
+    } else {
+      console.warn('All Gemini models in fallback chain failed. Activating local matcher fallback.');
+      aiResponse = localKnowledgeMatcher(message, settings.knowledgeBase, settings.email);
+    }
 
     // --- Save conversation ---
     if (!conversation) {
@@ -204,6 +354,12 @@ Instructions:
       );
       await conversation.save();
     }
+
+    // Increment message usage
+    await Subscription.updateOne(
+      { organizationId: actualOrgId },
+      { $inc: { 'usage.messagesUsed': 1 } }
+    );
 
     return NextResponse.json(
       {

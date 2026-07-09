@@ -17,6 +17,7 @@ export interface IUser {
 export interface IChatbotSettings {
   _id?: string;
   organizationId: string;
+  chatbotName: string;
   businessName: string;
   email: string;
   knowledgeBase: string;
@@ -67,3 +68,26 @@ export interface SessionPayload {
   email: string;
   name: string;
 }
+
+// --- Subscription ---
+export interface ISubscription {
+  _id?: string;
+  organizationId: string;
+  plan: 'FREE' | 'STARTER' | 'PRO';
+  status: 'active' | 'inactive';
+  razorpayCustomerId?: string;
+  razorpaySubscriptionId?: string;
+  currentPeriodEnd?: Date;
+  limits: {
+    maxChatbots: number;
+    maxWebsites: number;
+    maxMessages: number;
+  };
+  usage: {
+    messagesUsed: number;
+    chatbotsCreated: number;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
