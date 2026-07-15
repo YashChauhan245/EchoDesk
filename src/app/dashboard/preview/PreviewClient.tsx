@@ -101,7 +101,7 @@ export default function PreviewClient({
           
           <div className="flex-1 mx-4 max-w-md">
             <div className="bg-white dark:bg-[#08080d] border border-black/[0.05] dark:border-white/[0.06] rounded-md py-1 px-3 text-[10px] text-[#5f6368] dark:text-[#94a3b8] font-mono text-center truncate">
-              {appUrl.replace(/^https?:\/\//, "")}/test.html?orgId={selectedBotId}
+              {appUrl.replace(/^https?:\/\//, "")}/test?orgId={selectedBotId}
             </div>
           </div>
 
@@ -112,7 +112,7 @@ export default function PreviewClient({
         <div className="bg-white dark:bg-[#0c0c14] relative">
           <iframe
             key={selectedBotId} // Forces reload of iframe when selected chatbot changes
-            src={`${appUrl}/test.html?orgId=${selectedBotId}`}
+            src={`${appUrl}/test?orgId=${selectedBotId}`}
             className="w-full h-[600px] border-0"
             title="Chatbot Sandbox Frame"
           />

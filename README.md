@@ -34,13 +34,13 @@ EchoDesk is a modern, production-grade B2B SaaS platform that enables businesses
 
 ```
 ├── public/                 # Static assets & public script loaders
-│   ├── chatbot.js          # Compiled client-side embeddable script
-│   └── test.html           # Sandbox storefront demo for widget testing
+│   └── chatbot.js          # Compiled client-side embeddable script
 ├── src/
 │   ├── app/                # Next.js App Router
 │   │   ├── api/            # API Route Handlers (Auth, Chat, Razorpay, Scrape, Widget)
 │   │   ├── dashboard/      # Protected user workspace panels (Settings, Embed, Preview, Billing)
 │   │   ├── login/          # Custom theme-responsive login screen
+│   │   ├── test/           # Sandbox storefront demo route for widget testing
 │   │   ├── layout.tsx      # Root layout (loads Plus Jakarta Sans display fonts)
 │   │   └── globals.css     # Tailwind v4 configuration, theme variables & animations
 │   ├── components/         # Reusable React components (ThemeToggle)

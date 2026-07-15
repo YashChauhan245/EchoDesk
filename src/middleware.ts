@@ -25,7 +25,7 @@ const publicPaths = [
   '/api/chat',
   '/api/widget',
   '/chatbot.js',
-  '/test.html',
+  '/test',
 ];
 
 export function middleware(request: NextRequest) {
