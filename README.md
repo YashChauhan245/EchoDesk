@@ -183,6 +183,29 @@ npm run build
 
 ---
 
+## 🚀 Deployment
+
+The platform is deployed to production at: **https://echodesk-platform.vercel.app/**
+
+When deploying the application (e.g. on Vercel), make sure to configure the following environment variables and external service settings:
+
+### 1. Production Environment Variables
+*   **`NEXT_PUBLIC_APP_URL`**: Set to `https://echodesk-platform.vercel.app`
+*   **`SESSION_SECRET`**: A strong, unique random secret key.
+*   **`MONGODB_URI`**: Production MongoDB Atlas connection string.
+*   **`GEMINI_API_KEY`**: Production Google Gemini API key.
+*   **`SCALEKIT_ENV_URL`**, **`SCALEKIT_CLIENT_ID`**, **`SCALEKIT_CLIENT_SECRET`**: Your Scalekit production environment details.
+*   **`RAZORPAY_KEY_ID`**, **`RAZORPAY_KEY_SECRET`**, **`RAZORPAY_WEBHOOK_SECRET`**: Production payment credentials.
+
+### 2. External Provider Configuration
+*   **Scalekit SSO Callback**: In the Scalekit portal, register the callback URL:
+    `https://echodesk-platform.vercel.app/api/auth/callback`
+*   **Razorpay Webhook Endpoint**: In the Razorpay dashboard, create a webhook subscription pointing to:
+    `https://echodesk-platform.vercel.app/api/razorpay/webhook`
+    with the events: `subscription.authenticated`, `subscription.activated`, `subscription.charged`, and `subscription.cancelled`.
+
+---
+
 ## 🔒 Security Principles
 
 *   **Edge Middleware Protection**: Requests to `/dashboard/*` are intercepted at the edge via [src/middleware.ts](file:///c:/Users/Yash/Desktop/echodesk/src/middleware.ts). Access is restricted unless a secure session cookie exists.

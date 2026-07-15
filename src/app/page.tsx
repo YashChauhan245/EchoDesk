@@ -41,7 +41,7 @@ export default function LandingPage() {
   const [currentStep, setCurrentStep] = useState(0);
 
   const scriptSnippet = `<script
-  src="https://echodesk.vercel.app/chatbot.js"
+  src="https://echodesk-platform.vercel.app/chatbot.js"
   data-org-id="your_org_id"
 ></script>`;
 

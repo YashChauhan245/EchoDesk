@@ -5,7 +5,7 @@
 // No dependencies, no framework, pure vanilla JavaScript.
 //
 // HOW IT WORKS:
-// 1. Business owner adds <script src="https://echodesk.vercel.app/chatbot.js" data-org-id="xxx"></script>
+// 1. Business owner adds <script src="https://echodesk-platform.vercel.app/chatbot.js" data-org-id="xxx"></script>
 // 2. This script executes and:
 //    a. Reads data-org-id from the script tag
 //    b. Fetches widget config (color, welcome message) from /api/widget
