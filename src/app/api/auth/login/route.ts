@@ -18,8 +18,12 @@
 import { NextResponse } from 'next/server';
 import getScalekitClient from '@/lib/scalekit';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const provider = searchParams.get('provider') || undefined;
+    const loginHint = searchParams.get('login_hint') || undefined;
+
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`;
 
     // Generate the authorization URL with required scopes
@@ -30,6 +34,8 @@ export async function GET() {
     const scalekitClient = getScalekitClient();
     const authorizationUrl = scalekitClient.getAuthorizationUrl(redirectUri, {
       scopes: ['openid', 'profile', 'email', 'offline_access'],
+      provider,
+      loginHint: loginHint || undefined,
     });
 
     return NextResponse.redirect(authorizationUrl);

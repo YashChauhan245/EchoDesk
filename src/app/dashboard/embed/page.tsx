@@ -14,7 +14,7 @@ import { redirect } from "next/navigation";
 export default async function EmbedPage() {
   const session = await getSession();
   if (!session) {
-    redirect("/api/auth/login");
+    redirect("/login");
   }
 
   await dbConnect();

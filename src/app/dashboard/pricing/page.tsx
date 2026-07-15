@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 export default async function PricingPage() {
   const session = await getSession();
   if (!session) {
-    redirect("/api/auth/login");
+    redirect("/login");
   }
 
   await dbConnect();

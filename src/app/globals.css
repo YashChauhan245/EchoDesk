@@ -4,7 +4,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ===========================================
-   EchoDesk Global Styles — Minimalist Light SaaS
+   EchoDesk Global Theme Variables & Animations
    =========================================== */
 
 :root {
@@ -19,8 +19,8 @@
   --bg-primary: #ffffff;
   --bg-secondary: #f9fafb;
   --bg-tertiary: #f3f4f6;
-  --bg-card: #ffffff;
-  --bg-card-hover: #fcfcfd;
+  --bg-card: rgba(255, 255, 255, 0.65);
+  --bg-card-hover: rgba(255, 255, 255, 0.85);
 
   /* Subtle Clean Borders */
   --border: rgba(15, 15, 21, 0.09);
@@ -42,7 +42,7 @@
   --gradient-card: linear-gradient(180deg, rgba(0, 0, 0, 0.01) 0%, rgba(0, 0, 0, 0) 100%);
 
   /* Grid and Glow */
-  --grid-color: rgba(15, 15, 21, 0.07);
+  --grid-color: rgba(15, 15, 21, 0.075);
   --glow-color: rgba(15, 15, 21, 0.05);
 }
 
@@ -58,8 +58,8 @@
   --bg-primary: #030307;
   --bg-secondary: #08080d;
   --bg-tertiary: #101018;
-  --bg-card: #0c0c14;
-  --bg-card-hover: #131320;
+  --bg-card: rgba(12, 12, 20, 0.45);
+  --bg-card-hover: rgba(20, 20, 32, 0.65);
 
   /* Subtle Premium Borders */
   --border: rgba(255, 255, 255, 0.05);
@@ -81,11 +81,104 @@
   --gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0) 100%);
 
   /* Grid and Glow */
-  --grid-color: rgba(255, 255, 255, 0.08);
+  --grid-color: rgba(255, 255, 255, 0.065);
   --glow-color: rgba(255, 255, 255, 0.04);
 }
 
-/* Reset and base */
+@theme {
+  --font-sans: var(--font-plus-jakarta), var(--font-inter), system-ui, -apple-system, sans-serif;
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-accent: var(--accent);
+  
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-card: var(--bg-card);
+  --color-bg-card-hover: var(--bg-card-hover);
+
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-border-glow: var(--border-glow);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-accent-green: var(--accent-green);
+  --color-accent-amber: var(--accent-amber);
+  --color-accent-red: var(--accent-red);
+
+  --animate-fade-in: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-up: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/* ===========================================
+   Base Styling
+   =========================================== */
+
 * {
   box-sizing: border-box;
 }
@@ -98,7 +191,7 @@ html {
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-plus-jakarta), var(--font-inter), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -116,115 +209,73 @@ body {
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.1);
   border-radius: 4px;
-}
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-/* Custom Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  &:hover {
+    background: rgba(0, 0, 0, 0.2);
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* ===========================================
+   Tailwind Custom Utility Classes
+   =========================================== */
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-/* Minimalist card style (SupportAI) */
-.glass-card {
+/* Minimalist glass card style (EchoDesk) */
+@utility glass-card {
   position: relative;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.015);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015) !important;
+
+  /* Always-visible gradient border overlay */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px !important;
+    padding: 1px; /* border thickness */
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.35) 0%, rgba(168, 85, 247, 0.35) 50%, rgba(236, 72, 153, 0.35) 100%) !important;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.4s ease !important;
+    z-index: 2;
+  }
+
+  &:hover {
+    transform: translateY(-2px) !important;
+    border-color: transparent !important;
+    box-shadow: 
+      0 12px 30px -10px rgba(0, 0, 0, 0.08),
+      0 0 24px -2px rgba(99, 102, 241, 0.12) !important;
+    background: var(--bg-card-hover) !important;
+
+    &::after {
+      opacity: 1 !important;
+    }
+  }
 }
 
-.glass-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--gradient-card);
-  border-radius: 12px;
-  pointer-events: none;
-  z-index: 0;
-}
+@utility interactive-card {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 
-.interactive-card {
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.interactive-card:hover {
-  border-color: var(--primary) !important;
-  transform: translateY(-2px);
-  box-shadow: 4px 4px 0px 0px var(--primary) !important;
+  &:hover {
+    border-color: transparent !important;
+    transform: translateY(-4px);
+    box-shadow: 
+      0 20px 40px -10px rgba(0, 0, 0, 0.15),
+      0 0 30px -2px rgba(99, 102, 241, 0.18) !important;
+  }
 }
 
 /* Primary black/white pill button */
-.btn-primary {
+@utility btn-primary {
   background: var(--primary);
   color: var(--bg-primary);
   padding: 12px 24px;
@@ -239,28 +290,28 @@ body {
   justify-content: center;
   gap: 8px;
   text-decoration: none;
-}
 
-.btn-primary:hover {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(15, 15, 21, 0.08);
-}
+  &:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 15, 21, 0.08);
+  }
 
-.btn-primary:active {
-  transform: translateY(0);
-}
+  &:active {
+    transform: translateY(0);
+  }
 
-.btn-primary:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
 }
 
 /* Secondary outline pill button */
-.btn-secondary {
+@utility btn-secondary {
   background: var(--bg-card);
   color: var(--text-primary);
   padding: 12px 24px;
@@ -275,20 +326,20 @@ body {
   justify-content: center;
   gap: 8px;
   text-decoration: none;
-}
 
-.btn-secondary:hover {
-  background: var(--bg-secondary);
-  border-color: var(--border-light);
-  transform: translateY(-0.5px);
-}
+  &:hover {
+    background: var(--bg-secondary);
+    border-color: var(--border-light);
+    transform: translateY(-0.5px);
+  }
 
-.btn-secondary:active {
-  transform: translateY(0);
+  &:active {
+    transform: translateY(0);
+  }
 }
 
 /* Form controls */
-.input-field {
+@utility input-field {
   width: 100%;
   padding: 12px 16px;
   background: var(--bg-card);
@@ -298,18 +349,18 @@ body {
   font-size: 14px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
+
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--border-light);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
 }
 
-.input-field:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--border-light);
-}
-
-.input-field::placeholder {
-  color: var(--text-muted);
-}
-
-.textarea-field {
+@utility textarea-field {
   width: 100%;
   padding: 12px 16px;
   background: var(--bg-card);
@@ -322,24 +373,27 @@ body {
   outline: none;
   resize: vertical;
   min-height: 150px;
-}
 
-.textarea-field:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--border-light);
-}
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--border-light);
+  }
 
-.textarea-field::placeholder {
-  color: var(--text-muted);
+  &::placeholder {
+    color: var(--text-muted);
+  }
 }
 
 /* Gradient text utility */
-.gradient-text {
-  color: var(--text-primary);
+@utility gradient-text {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Spinner */
-.spinner {
+@utility spinner {
   width: 18px;
   height: 18px;
   border: 2px solid rgba(0, 0, 0, 0.1);
@@ -349,7 +403,7 @@ body {
 }
 
 /* Toast Notification */
-.toast {
+@utility toast {
   position: fixed;
   bottom: 24px;
   right: 24px;
@@ -365,32 +419,32 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 }
 
-.toast-success {
+@utility toast-success {
   background: #ecfdf5;
   border: 1px solid #a7f3d0;
   color: #065f46;
+
+  .dark & {
+    background: #022c22;
+    border: 1px solid #064e3b;
+    color: #6ee7b7;
+  }
 }
 
-.dark .toast-success {
-  background: #022c22;
-  border: 1px solid #064e3b;
-  color: #6ee7b7;
-}
-
-.toast-error {
+@utility toast-error {
   background: #fef2f2;
   border: 1px solid #fecaca;
   color: #991b1b;
-}
 
-.dark .toast-error {
-  background: #450a0a;
-  border: 1px solid #7f1d1d;
-  color: #fca5a5;
+  .dark & {
+    background: #450a0a;
+    border: 1px solid #7f1d1d;
+    color: #fca5a5;
+  }
 }
 
 /* Code block panel */
-.code-block {
+@utility code-block {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -403,21 +457,99 @@ body {
 }
 
 /* Grid background */
-.grid-bg {
+@utility grid-bg {
   position: relative;
   background-color: var(--bg-primary);
-  background-image: 
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99, 102, 241, 0.04) 0%, transparent 60%),
     linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  background-size: 40px 40px;
+  background-size: 100% 100%, 40px 40px, 40px 40px;
 }
 
 /* Decorative divider line */
-.linear-glow {
+@utility linear-glow {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 1px;
   background: var(--glow-color);
+}
+
+/* ===========================================
+   Testimonials Marquee
+   =========================================== */
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@utility marquee-row {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+
+  &:hover .marquee-track {
+    animation-play-state: paused;
+  }
+}
+
+@utility marquee-track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  animation: marquee-scroll 40s linear infinite;
+  will-change: transform;
+}
+
+@utility marquee-reverse {
+  & .marquee-track {
+    animation-direction: reverse;
+  }
+}
+
+@utility testimonial-card {
+  flex-shrink: 0;
+  width: 360px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+    opacity: 0.6;
+    transition: opacity 0.4s ease;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: transparent;
+    box-shadow:
+      0 16px 40px -10px rgba(0, 0, 0, 0.1),
+      0 0 24px -4px rgba(99, 102, 241, 0.12);
+
+    &::before {
+      opacity: 1;
+    }
+  }
 }
