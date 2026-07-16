@@ -21,9 +21,6 @@ export async function GET() {
 
     await dbConnect();
 
-    // Drop old unique index in case it exists, allowing multiple chatbots per org
-    await ChatbotSettings.collection.dropIndex("organizationId_1").catch(() => {});
-
     // Fetch all chatbots for this organization
     const chatbots = await ChatbotSettings.find({
       organizationId: session.organizationId,
@@ -101,9 +98,6 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
     
-    // Ensure old index is dropped
-    await ChatbotSettings.collection.dropIndex("organizationId_1").catch(() => {});
-
     let settings;
 
     if (chatbotId) {
