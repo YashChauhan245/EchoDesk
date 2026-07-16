@@ -287,7 +287,7 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
             {view === "list"
               ? "Chatbot Settings"
               : view === "create"
@@ -305,7 +305,7 @@ export default function SettingsPage() {
           <button
             onClick={handleOpenCreate}
             disabled={currentChatbotsCount >= maxChatbotsLimit}
-            className={`flex items-center justify-center gap-2 px-5 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm ${
+            className={`flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm w-full sm:w-auto ${
               currentChatbotsCount >= maxChatbotsLimit
                 ? "bg-neutral-100 dark:bg-white/[0.02] text-neutral-400 dark:text-neutral-600 border border-black/[0.04] dark:border-white/[0.04] cursor-not-allowed"
                 : "btn-primary"
@@ -329,7 +329,7 @@ export default function SettingsPage() {
       {view === "list" ? (
         <div className="space-y-6">
           {/* Usage Tracker Banner */}
-          <div className="glass-card p-5 border border-[#6366f1]/20 bg-[#6366f1]/5 dark:bg-[#6366f1]/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-4xl rounded-2xl">
+          <div className="glass-card p-4 sm:p-5 border border-[#6366f1]/20 bg-[#6366f1]/5 dark:bg-[#6366f1]/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-4xl rounded-2xl">
             <div className="flex items-center gap-3">
               <Bot className="w-5 h-5 text-[#6366f1]" />
               <div>
@@ -380,7 +380,7 @@ export default function SettingsPage() {
               {chatbots.map((bot) => (
                 <div
                   key={bot._id}
-                  className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-black/10 dark:hover:border-white/10 transition-all duration-200"
+                  className="glass-card p-4 sm:p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 hover:border-black/10 dark:hover:border-white/10 transition-all duration-200"
                 >
                   <div className="space-y-3.5">
                     {/* Bot Title & Name */}
@@ -400,7 +400,7 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Compact Code Block Preview */}
-                    <div className="flex items-center gap-2 bg-neutral-50 dark:bg-white/[0.01] p-3 rounded-lg border border-black/[0.04] dark:border-white/[0.06] font-mono text-[10px] max-w-lg select-all">
+                    <div className="flex items-center gap-2 bg-neutral-50 dark:bg-white/[0.01] p-2 sm:p-3 rounded-lg border border-black/[0.04] dark:border-white/[0.06] font-mono text-[9px] sm:text-[10px] max-w-lg select-all overflow-x-auto">
                       <code className="text-neutral-800 dark:text-neutral-300 truncate block">
                         {`<script src="${appUrl}/chatbot.js" data-org-id="${bot._id}"></script>`}
                       </code>
@@ -408,7 +408,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Action buttons */}
-                  <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 flex-shrink-0">
                     <button
                       onClick={() => handleCopyEmbed(bot._id || "")}
                       className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#5f6368] dark:text-[#94a3b8] border border-black/[0.08] dark:border-white/[0.08] hover:bg-neutral-50 dark:hover:bg-white/[0.02] cursor-pointer"
@@ -442,7 +442,7 @@ export default function SettingsPage() {
       ) : (
         <form onSubmit={handleSave} className="space-y-6 max-w-3xl">
           {/* Chatbot Name and General Details */}
-          <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
+          <div className="glass-card p-4 sm:p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
             <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-5 flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
                 <Bot className="w-4 h-4" />
@@ -498,7 +498,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Knowledge Base Section */}
-          <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
+          <div className="glass-card p-4 sm:p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
@@ -553,7 +553,7 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
               </p>
 
               {/* Scraper Tab Selectors */}
-              <div className="flex gap-2 mb-4">
+              <div className="flex flex-wrap gap-2 mb-4">
                 <button
                   type="button"
                   onClick={() => setActiveImportTab('file')}
@@ -659,7 +659,7 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
           </div>
 
           {/* Widget Appearance Section */}
-          <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
+          <div className="glass-card p-4 sm:p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm relative">
             <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-5 flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
                 <Palette className="w-4 h-4" />

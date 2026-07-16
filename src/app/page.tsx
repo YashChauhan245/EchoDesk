@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import { Menu, X } from "lucide-react";
 import {
   ArrowRight,
   Bot,
@@ -33,6 +34,7 @@ interface Message {
 export default function LandingPage() {
   const [copied, setCopied] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Simulated chat messages
   const [messages, setMessages] = useState<Message[]>([
@@ -99,9 +101,9 @@ export default function LandingPage() {
 
       {/* ---- Navigation ---- */}
       <nav className="fixed top-0 w-full z-50 border-b border-black/[0.04] dark:border-white/[0.04] bg-white/80 dark:bg-[#030307]/80 backdrop-blur-xl transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
-            <div className="w-48 h-12 overflow-hidden flex items-center justify-center relative">
+            <div className="w-36 sm:w-48 h-12 overflow-hidden flex items-center justify-center relative">
               <img
                 src="/logo.png"
                 alt="EchoDesk Logo"
@@ -111,56 +113,63 @@ export default function LandingPage() {
             </div>
           </Link>
 
-          {/* Center navigation links */}
+          {/* Center navigation links (desktop) */}
           <div className="hidden md:flex items-center gap-8">
-            <a
-              href="#features"
-              className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#workflow"
-              className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors"
-            >
-              How It Works
-            </a>
-            <a
-              href="#pricing"
-              className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors"
-            >
-              Subscription
-            </a>
-            <a
-              href="#testimonials"
-              className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors"
-            >
-              Testimonials
-            </a>
+            <a href="#features" className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors">Features</a>
+            <a href="#workflow" className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors">How It Works</a>
+            <a href="#pricing" className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors">Subscription</a>
+            <a href="#testimonials" className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors">Testimonials</a>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 sm:gap-6">
             <ThemeToggle />
-            <Link
-              href="/login"
-              className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors"
-            >
-              Sign in
-            </Link>
-            <Link href="/login" className="btn-primary !py-2 !px-4 !text-sm">
+            <Link href="/login" className="hidden sm:inline text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors">Sign in</Link>
+            <Link href="/login" className="hidden sm:inline-flex btn-primary !py-2 !px-4 !text-sm">
               Get Started
               <ChevronRight className="w-4 h-4" />
             </Link>
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg text-[#5f6368] dark:text-[#94a3b8] hover:bg-black/[0.03] dark:hover:bg-white/[0.03] transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-black/[0.04] dark:border-white/[0.04] bg-white/95 dark:bg-[#030307]/95 backdrop-blur-xl animate-fade-in">
+            <div className="px-4 py-4 space-y-1">
+              {[{label: "Features", href: "#features"}, {label: "How It Works", href: "#workflow"}, {label: "Subscription", href: "#pricing"}, {label: "Testimonials", href: "#testimonials"}].map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2.5 rounded-lg text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+                >
+                  {item.label}
+                </a>
+              ))}
+              <div className="pt-3 mt-2 border-t border-black/[0.04] dark:border-white/[0.04] flex flex-col gap-2">
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white px-3 py-2 transition-colors">Sign in</Link>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="btn-primary !py-2.5 !px-4 !text-sm text-center">
+                  Get Started <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* ---- Hero Section ---- */}
-      <section className="relative pt-36 pb-24 px-6 max-w-7xl mx-auto">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[350px] bg-neutral-100/50 dark:bg-neutral-900/10 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute top-[45%] right-10 w-[300px] h-[300px] bg-neutral-50/50 dark:bg-neutral-900/5 rounded-full blur-[100px] pointer-events-none" />
+      <section className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[800px] h-[200px] sm:h-[350px] bg-neutral-100/50 dark:bg-neutral-900/10 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-[45%] right-10 w-[150px] sm:w-[300px] h-[150px] sm:h-[300px] bg-neutral-50/50 dark:bg-neutral-900/5 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="grid lg:grid-cols-12 gap-12 items-center">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
           {/* Hero Left Content */}
           <div className="lg:col-span-7 flex flex-col items-start text-left">
@@ -176,7 +185,7 @@ export default function LandingPage() {
             </div>
 
             {/* Title */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-[1.1] mb-6 animate-slide-up text-[#0f0f15] dark:text-white">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-[1.1] mb-6 animate-slide-up text-[#0f0f15] dark:text-white">
               Instant customer support,
               <span className="block mt-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">automated by AI.</span>
             </h1>
@@ -288,10 +297,10 @@ export default function LandingPage() {
       </section>
 
       {/* ---- Trusted By Strip ---- */}
-      <section className="py-10 px-6 border-t border-black/[0.03] dark:border-white/[0.04]">
+      <section className="py-8 sm:py-10 px-4 sm:px-6 border-t border-black/[0.03] dark:border-white/[0.04]">
         <div className="max-w-5xl mx-auto">
           <p className="text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-[#94a3b8] mb-6">Trusted by forward-thinking teams</p>
-          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 sm:gap-x-12 gap-y-3 sm:gap-y-4">
             {["FinLeap", "Cloudfolio", "ShipFast", "DataMesh", "NovaByte", "QuickServe"].map((brand) => (
               <span key={brand} className="text-sm font-bold tracking-wider text-[#cbd5e1] dark:text-[#475569] uppercase select-none hover:text-[#0f0f15] dark:hover:text-white transition-colors duration-300 cursor-default">
                 {brand}
@@ -302,7 +311,7 @@ export default function LandingPage() {
       </section>
 
       {/* ---- Stats Counter Row ---- */}
-      <section className="py-16 px-6 max-w-7xl mx-auto">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
             { icon: <Users className="w-5 h-5" />, value: "2,400+", label: "Active businesses" },
@@ -322,11 +331,11 @@ export default function LandingPage() {
       </section>
 
       {/* ---- Features Section ---- */}
-      <section id="features" className="py-24 px-6 max-w-7xl mx-auto relative border-t border-black/[0.03] dark:border-white/[0.04]">
+      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 max-w-7xl mx-auto relative border-t border-black/[0.03] dark:border-white/[0.04]">
 
         <div className="text-center mb-16 relative z-10">
           <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/10 dark:border-indigo-400/10 mb-4">Capabilities</span>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
             Engineered for <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">Conversational Excellence</span>
           </h2>
           <p className="text-[#5f6368] dark:text-[#94a3b8] mt-3 max-w-xl mx-auto text-sm sm:text-base">
@@ -391,12 +400,12 @@ export default function LandingPage() {
       </section>
 
       {/* ---- Interactive Walkthrough / Workflow Section ---- */}
-      <section id="workflow" className="py-24 px-6 border-t border-black/[0.03] dark:border-white/[0.04] bg-neutral-50/20 dark:bg-white/[0.01] relative">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
+      <section id="workflow" className="py-16 sm:py-24 px-4 sm:px-6 border-t border-black/[0.03] dark:border-white/[0.04] bg-neutral-50/20 dark:bg-white/[0.01] relative">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
           <div className="lg:col-span-5 text-left">
             <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/10 dark:border-indigo-400/10 mb-4">Simple Setup</span>
-            <h2 className="text-3xl font-bold tracking-tighter mb-6 text-[#0f0f15] dark:text-white">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter mb-6 text-[#0f0f15] dark:text-white">
               Launch support in <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">three milestones</span>
             </h2>
             <div className="flex flex-col gap-4">
@@ -494,10 +503,10 @@ export default function LandingPage() {
       </section>
 
       {/* ---- Subscription / Pricing Section ---- */}
-      <section id="pricing" className="py-24 px-6 border-t border-black/[0.03] dark:border-white/[0.04] max-w-7xl mx-auto relative">
+      <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-6 border-t border-black/[0.03] dark:border-white/[0.04] max-w-7xl mx-auto relative">
         <div className="text-center mb-16 relative z-10">
           <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/10 dark:border-indigo-400/10 mb-4">Subscription</span>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
             Simple, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">Transparent Plans</span>
           </h2>
           <p className="text-[#5f6368] dark:text-[#94a3b8] mt-3 max-w-xl mx-auto text-sm sm:text-base">
@@ -506,17 +515,17 @@ export default function LandingPage() {
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-4 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch pt-4 relative z-10">
           
           {/* Free Plan */}
-          <div className="glass-card p-8 flex flex-col justify-between border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] relative rounded-2xl">
+          <div className="glass-card p-6 sm:p-8 flex flex-col justify-between border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] relative rounded-2xl">
             <div>
               <h3 className="text-lg font-bold text-[#0f0f15] dark:text-white mb-2">Free Plan</h3>
               <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] leading-relaxed mb-6">
                 Ideal for testing and small personal projects
               </p>
               <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-4xl font-extrabold text-[#0f0f15] dark:text-white">₹0</span>
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#0f0f15] dark:text-white">₹0</span>
                 <span className="text-xs text-[#5f6368] dark:text-[#94a3b8]">/month</span>
               </div>
               <ul className="space-y-3.5">
@@ -544,14 +553,14 @@ export default function LandingPage() {
           </div>
 
           {/* Starter Plan */}
-          <div className="glass-card p-8 flex flex-col justify-between border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] relative rounded-2xl">
+          <div className="glass-card p-6 sm:p-8 flex flex-col justify-between border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] relative rounded-2xl">
             <div>
               <h3 className="text-lg font-bold text-[#0f0f15] dark:text-white mb-2">Starter Plan</h3>
               <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] leading-relaxed mb-6">
                 Perfect for growing sites & customer service
               </p>
               <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-4xl font-extrabold text-[#0f0f15] dark:text-white">₹799</span>
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#0f0f15] dark:text-white">₹799</span>
                 <span className="text-xs text-[#5f6368] dark:text-[#94a3b8]">/month</span>
               </div>
               <ul className="space-y-3.5">
@@ -580,7 +589,7 @@ export default function LandingPage() {
           </div>
 
           {/* Pro Plan */}
-          <div className="glass-card p-8 flex flex-col justify-between border border-[#6366f1] shadow-[0_0_24px_rgba(99,102,241,0.06)] dark:shadow-[0_0_32px_rgba(99,102,241,0.08)] bg-white dark:bg-[#0c0c16]/90 md:scale-[1.03] z-10 relative rounded-2xl">
+          <div className="glass-card p-6 sm:p-8 flex flex-col justify-between border border-[#6366f1] shadow-[0_0_24px_rgba(99,102,241,0.06)] dark:shadow-[0_0_32px_rgba(99,102,241,0.08)] bg-white dark:bg-[#0c0c16]/90 lg:scale-[1.03] z-10 relative rounded-2xl">
             {/* Glow Accent */}
             <div className="absolute top-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-[#6366f1] to-transparent" />
             
@@ -596,7 +605,7 @@ export default function LandingPage() {
                 For high-traffic businesses needing maximum reach
               </p>
               <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-4xl font-extrabold text-[#0f0f15] dark:text-white">₹2499</span>
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#0f0f15] dark:text-white">₹2499</span>
                 <span className="text-xs text-[#5f6368] dark:text-[#94a3b8]">/month</span>
               </div>
               <ul className="space-y-3.5">
@@ -629,10 +638,10 @@ export default function LandingPage() {
       </section>
 
       {/* ---- Testimonials Marquee Section ---- */}
-      <section id="testimonials" className="py-24 border-t border-black/[0.03] dark:border-white/[0.04] overflow-hidden relative">
-        <div className="text-center mb-14 px-6">
+      <section id="testimonials" className="py-16 sm:py-24 border-t border-black/[0.03] dark:border-white/[0.04] overflow-hidden relative">
+        <div className="text-center mb-10 sm:mb-14 px-4 sm:px-6">
           <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/10 dark:border-indigo-400/10 mb-4">Testimonials</span>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
             Loved by <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">teams everywhere</span>
           </h2>
           <p className="text-[#5f6368] dark:text-[#94a3b8] mt-3 max-w-xl mx-auto text-sm sm:text-base">
@@ -704,14 +713,14 @@ export default function LandingPage() {
         </div>
 
         {/* Edge fades */}
-        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white dark:from-[#030307] to-transparent pointer-events-none z-10" />
-        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white dark:from-[#030307] to-transparent pointer-events-none z-10" />
+        <div className="absolute inset-y-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-white dark:from-[#030307] to-transparent pointer-events-none z-10" />
+        <div className="absolute inset-y-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-white dark:from-[#030307] to-transparent pointer-events-none z-10" />
       </section>
 
       {/* ---- Interactive Call to Action Banner ---- */}
-      <section className="py-24 px-6 relative">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="relative p-12 rounded-3xl overflow-hidden border border-indigo-500/20 dark:border-indigo-400/10">
+          <div className="relative p-6 sm:p-12 rounded-2xl sm:rounded-3xl overflow-hidden border border-indigo-500/20 dark:border-indigo-400/10">
             {/* Gradient background */}
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10 pointer-events-none" />
             {/* Animated glow orbs */}
@@ -719,7 +728,7 @@ export default function LandingPage() {
             <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-purple-500/10 rounded-full blur-[80px] pointer-events-none animate-float" style={{ animationDelay: '3s' }} />
 
             <div className="relative z-10 max-w-xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tighter mb-4 text-[#0f0f15] dark:text-white">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter mb-4 text-[#0f0f15] dark:text-white">
                 Redefine your <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">support workspace</span>
               </h2>
               <p className="text-[#5f6368] dark:text-[#94a3b8] mb-8 text-sm sm:text-base leading-relaxed">
@@ -740,9 +749,9 @@ export default function LandingPage() {
       </section>
 
       {/* ---- Footer ---- */}
-      <footer className="py-16 px-6 border-t border-black/[0.04] dark:border-white/[0.04] text-xs text-[#94a3b8]">
+      <footer className="py-10 sm:py-16 px-4 sm:px-6 border-t border-black/[0.04] dark:border-white/[0.04] text-xs text-[#94a3b8]">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 mb-10 sm:mb-12">
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <div className="w-36 h-10 overflow-hidden flex items-center justify-start relative mb-4">

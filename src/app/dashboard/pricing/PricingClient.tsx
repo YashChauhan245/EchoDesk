@@ -199,7 +199,7 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
     <div className="animate-fade-in space-y-10 max-w-5xl mx-auto">
       {/* Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white">
           Simple, Transparent Plans
         </h1>
         <p className="text-sm sm:text-base text-[#5f6368] dark:text-[#94a3b8] max-w-xl mx-auto">
@@ -215,7 +215,7 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
       )}
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch pt-4">
         {plans.map((plan) => {
           const isCurrent = currentPlan === plan.id;
           const isLoading = loadingPlan === plan.id;
@@ -223,9 +223,9 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
           return (
             <div
               key={plan.id}
-              className={`glass-card p-8 flex flex-col justify-between border relative overflow-hidden transition-all duration-300 ${
+              className={`glass-card p-6 sm:p-8 flex flex-col justify-between border relative overflow-hidden transition-all duration-300 ${
                 plan.popular
-                  ? "border-[#6366f1] shadow-[0_0_24px_rgba(99,102,241,0.06)] dark:shadow-[0_0_32px_rgba(99,102,241,0.08)] bg-white dark:bg-[#0c0c16]/90 md:scale-[1.03] z-10"
+                  ? "border-[#6366f1] shadow-[0_0_24px_rgba(99,102,241,0.06)] dark:shadow-[0_0_32px_rgba(99,102,241,0.08)] bg-white dark:bg-[#0c0c16]/90 lg:scale-[1.03] z-10"
                   : "border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14]"
               }`}
             >
@@ -253,7 +253,7 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
                 </div>
 
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-[#0f0f15] dark:text-white">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-[#0f0f15] dark:text-white">
                     {plan.price}
                   </span>
                   <span className="text-xs text-[#5f6368] dark:text-[#94a3b8]">

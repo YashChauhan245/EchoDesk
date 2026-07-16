@@ -74,7 +74,7 @@ export default async function DashboardPage() {
           <Activity className="w-3 h-3 text-black dark:text-white" />
           <span className="text-[10px] text-[#0f0f15] dark:text-white font-semibold uppercase tracking-wider">System Operational</span>
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
           Welcome back, {session.name?.split(" ")[0] || "there"} 👋
         </h1>
         <p className="text-sm text-[#5f6368] dark:text-[#94a3b8]">
@@ -83,10 +83,10 @@ export default async function DashboardPage() {
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         
         {/* Chatbot Status */}
-        <div className="glass-card p-6 relative group border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm">
+        <div className="glass-card p-4 sm:p-6 relative group border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-semibold uppercase tracking-widest text-[#5f6368] dark:text-[#94a3b8]">
               Chatbot Status
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Conversations */}
-        <div className="glass-card p-6 relative group border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm">
+        <div className="glass-card p-4 sm:p-6 relative group border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-semibold uppercase tracking-widest text-[#5f6368] dark:text-[#94a3b8]">
               Total Interactions
@@ -130,7 +130,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Tenant/Organization ID */}
-        <div className="glass-card p-6 relative group border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm">
+        <div className="glass-card p-4 sm:p-6 relative group border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-semibold uppercase tracking-widest text-[#5f6368] dark:text-[#94a3b8]">
               Organization ID
@@ -139,7 +139,7 @@ export default async function DashboardPage() {
               <Key className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-[11px] font-mono text-[#0f0f15] dark:text-white break-all select-all font-semibold p-2 bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] rounded-md mb-2">
+          <p className="text-[10px] sm:text-[11px] font-mono text-[#0f0f15] dark:text-white break-all select-all font-semibold p-2 bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] rounded-md mb-2">
             {session.organizationId}
           </p>
           <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] leading-relaxed">
@@ -148,7 +148,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Subscription & Usage Card */}
-        <div className="glass-card p-6 relative group border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm flex flex-col justify-between">
+        <div className="glass-card p-4 sm:p-6 relative group border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-semibold uppercase tracking-widest text-[#5f6368] dark:text-[#94a3b8]">
@@ -221,12 +221,12 @@ export default async function DashboardPage() {
         <h2 className="text-xs font-semibold uppercase tracking-widest text-[#5f6368] dark:text-[#94a3b8] mb-4">
           Support Settings
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           
           {/* Configure Chatbot */}
           <Link
             href="/dashboard/settings"
-            className="glass-card interactive-card p-6 flex items-start gap-4 group cursor-pointer border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-[#0c0c14] shadow-sm relative transition-all duration-300"
+            className="glass-card interactive-card p-4 sm:p-6 flex items-start gap-3 sm:gap-4 group cursor-pointer border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-[#0c0c14] shadow-sm relative transition-all duration-300"
           >
             {/* Hover left accent indicator line */}
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-black dark:bg-white opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-l-xl" />
@@ -235,7 +235,7 @@ export default async function DashboardPage() {
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-[#0f0f15] dark:text-white mb-1">
+                <h3 className="font-semibold text-sm sm:text-base text-[#0f0f15] dark:text-white mb-1">
                   {isConfigured ? "Update Agent Identity" : "Initialize Agent Details"}
                 </h3>
                 <ArrowUpRight className="w-4 h-4 text-[#5f6368] dark:text-[#94a3b8] group-hover:text-black dark:group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
@@ -251,7 +251,7 @@ export default async function DashboardPage() {
           {/* Get Embed Code */}
           <Link
             href="/dashboard/embed"
-            className="glass-card interactive-card p-6 flex items-start gap-4 group cursor-pointer border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-[#0c0c14] shadow-sm relative transition-all duration-300"
+            className="glass-card interactive-card p-4 sm:p-6 flex items-start gap-3 sm:gap-4 group cursor-pointer border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-[#0c0c14] shadow-sm relative transition-all duration-300"
           >
             {/* Hover left accent indicator line */}
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-black dark:bg-white opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-l-xl" />
@@ -260,7 +260,7 @@ export default async function DashboardPage() {
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-[#0f0f15] dark:text-white mb-1">
+                <h3 className="font-semibold text-sm sm:text-base text-[#0f0f15] dark:text-white mb-1">
                   Retrieve Script Snippet
                 </h3>
                 <ArrowUpRight className="w-4 h-4 text-[#5f6368] dark:text-[#94a3b8] group-hover:text-black dark:group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />

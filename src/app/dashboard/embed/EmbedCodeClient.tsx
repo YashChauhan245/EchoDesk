@@ -62,7 +62,7 @@ export default function EmbedCodeClient({
     <div className="animate-fade-in space-y-8 max-w-4xl">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
           Embed Code
         </h1>
         <p className="text-sm text-[#5f6368] dark:text-[#94a3b8]">
@@ -72,7 +72,7 @@ export default function EmbedCodeClient({
 
       {/* Chatbot Selector */}
       {chatbots.length > 1 && (
-        <div className="glass-card p-5 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm max-w-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="glass-card p-4 sm:p-5 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm max-w-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Bot className="w-5 h-5 text-[#6366f1]" />
             <div>
@@ -119,7 +119,7 @@ export default function EmbedCodeClient({
       )}
 
       {/* Embed Code Card */}
-      <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm max-w-3xl relative">
+      <div className="glass-card p-4 sm:p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm max-w-3xl relative">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
@@ -133,7 +133,7 @@ export default function EmbedCodeClient({
 
           <button
             onClick={handleCopy}
-            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-sm ${
+            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-sm w-full sm:w-auto ${
               copied
                 ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/30"
                 : "bg-white dark:bg-[#0c0c14] text-[#5f6368] dark:text-[#94a3b8] border border-black/[0.08] dark:border-white/[0.08] hover:bg-neutral-50 dark:hover:bg-white/[0.02] hover:text-black dark:hover:text-white"
@@ -168,7 +168,7 @@ export default function EmbedCodeClient({
       </div>
 
       {/* Installation Milestones */}
-      <div className="glass-card p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm max-w-3xl relative">
+      <div className="glass-card p-4 sm:p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm max-w-3xl relative">
         <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-6 flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
             <Info className="w-4 h-4" />
@@ -176,7 +176,7 @@ export default function EmbedCodeClient({
           How to Deploy
         </h2>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
           {/* Step 1 */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">

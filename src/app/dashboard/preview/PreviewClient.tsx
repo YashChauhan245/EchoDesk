@@ -28,7 +28,7 @@ export default function PreviewClient({
     <div className="animate-fade-in space-y-8 max-w-4xl">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
           Live Preview Workspace
         </h1>
         <p className="text-sm text-[#5f6368] dark:text-[#94a3b8]">
@@ -38,7 +38,7 @@ export default function PreviewClient({
 
       {/* Chatbot Selector */}
       {chatbots.length > 1 && (
-        <div className="glass-card p-5 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm max-w-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="glass-card p-4 sm:p-5 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm max-w-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Bot className="w-5 h-5 text-[#6366f1]" />
             <div>
@@ -78,7 +78,7 @@ export default function PreviewClient({
       )}
 
       {/* Info Banner */}
-      <div className="flex items-start gap-3.5 px-4 py-3.5 rounded-xl bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] max-w-3xl relative overflow-hidden">
+      <div className="flex items-start gap-3 sm:gap-3.5 px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] max-w-3xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-1 h-full bg-black dark:bg-white" />
         <Info className="w-5 h-5 text-black dark:text-white flex-shrink-0 mt-0.5" />
         <div>
@@ -111,9 +111,9 @@ export default function PreviewClient({
         {/* Iframe container */}
         <div className="bg-white dark:bg-[#0c0c14] relative">
           <iframe
-            key={selectedBotId} // Forces reload of iframe when selected chatbot changes
+            key={selectedBotId}
             src={`${appUrl}/test?orgId=${selectedBotId}`}
-            className="w-full h-[600px] border-0"
+            className="w-full h-[400px] sm:h-[500px] md:h-[600px] border-0"
             title="Chatbot Sandbox Frame"
           />
         </div>
