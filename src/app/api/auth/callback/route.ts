@@ -24,22 +24,34 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get('error');
   const errorDescription = searchParams.get('error_description');
 
+  let origin = process.env.NEXT_PUBLIC_APP_URL || '';
+  try {
+    origin = new URL(request.url).origin;
+  } catch (e) {
+    console.error('Failed to parse request URL origin:', e);
+  }
+  const cleanOrigin = origin.endsWith('/') ? origin.slice(0, -1) : (origin || 'http://localhost:3000');
+
   // Handle authentication errors from Scalekit
   if (error) {
     console.error('Auth callback error:', error, errorDescription);
-    return NextResponse.redirect(
-      new URL(`/?error=${encodeURIComponent(error)}`, process.env.NEXT_PUBLIC_APP_URL!)
-    );
+    const redirectUrl = new URL('/login', cleanOrigin);
+    redirectUrl.searchParams.set('error', error);
+    if (errorDescription) {
+      redirectUrl.searchParams.set('details', errorDescription);
+    }
+    return NextResponse.redirect(redirectUrl);
   }
 
   if (!code) {
-    return NextResponse.redirect(
-      new URL('/?error=no_code', process.env.NEXT_PUBLIC_APP_URL!)
-    );
+    const redirectUrl = new URL('/login', cleanOrigin);
+    redirectUrl.searchParams.set('error', 'no_code');
+    redirectUrl.searchParams.set('details', 'No authorization code received from authentication provider');
+    return NextResponse.redirect(redirectUrl);
   }
 
   try {
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`;
+    const redirectUri = `${cleanOrigin}/api/auth/callback`;
 
     const scalekitClient = getScalekitClient();
 
@@ -98,12 +110,13 @@ export async function GET(request: NextRequest) {
 
     // Redirect to dashboard
     return NextResponse.redirect(
-      new URL('/dashboard', process.env.NEXT_PUBLIC_APP_URL!)
+      new URL('/dashboard', cleanOrigin)
     );
-  } catch (err) {
+  } catch (err: any) {
     console.error('Auth callback processing error:', err);
-    return NextResponse.redirect(
-      new URL('/?error=callback_failed', process.env.NEXT_PUBLIC_APP_URL!)
-    );
+    const redirectUrl = new URL('/login', cleanOrigin);
+    redirectUrl.searchParams.set('error', 'callback_failed');
+    redirectUrl.searchParams.set('details', err?.message || 'Failed to complete authentication exchange');
+    return NextResponse.redirect(redirectUrl);
   }
 }

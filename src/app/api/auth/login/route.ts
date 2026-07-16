@@ -24,7 +24,14 @@ export async function GET(request: Request) {
     const provider = searchParams.get('provider') || undefined;
     const loginHint = searchParams.get('login_hint') || undefined;
 
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`;
+    let origin = process.env.NEXT_PUBLIC_APP_URL || '';
+    try {
+      origin = new URL(request.url).origin;
+    } catch (e) {
+      console.error('Failed to parse request URL origin:', e);
+    }
+    const cleanOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+    const redirectUri = `${cleanOrigin}/api/auth/callback`;
 
     // Generate the authorization URL with required scopes
     // - openid: Required for OIDC
@@ -39,10 +46,17 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.redirect(authorizationUrl);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    return NextResponse.redirect(
-      new URL('/?error=auth_failed', process.env.NEXT_PUBLIC_APP_URL!)
-    );
+    let origin = process.env.NEXT_PUBLIC_APP_URL || '';
+    try {
+      origin = new URL(request.url).origin;
+    } catch (e) {}
+    const cleanOrigin = origin.endsWith('/') ? origin.slice(0, -1) : (origin || 'http://localhost:3000');
+    
+    const redirectUrl = new URL('/login', cleanOrigin);
+    redirectUrl.searchParams.set('error', 'auth_failed');
+    redirectUrl.searchParams.set('details', error?.message || 'Login initiation failed');
+    return NextResponse.redirect(redirectUrl);
   }
 }

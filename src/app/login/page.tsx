@@ -1,12 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Fingerprint, Mail, Bot } from "lucide-react";
+import { ArrowLeft, Fingerprint, Mail, Bot, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const err = params.get("error");
+      const details = params.get("details");
+      if (err) {
+        if (err === "callback_failed") {
+          setErrorMsg("Authentication callback failed");
+        } else if (err === "auth_failed") {
+          setErrorMsg("Authentication failed");
+        } else if (err === "no_code") {
+          setErrorMsg("No authorization code received");
+        } else {
+          setErrorMsg(err.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()));
+        }
+        setErrorDetails(details);
+      }
+    }
+  }, []);
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +65,21 @@ export default function LoginPage() {
             Access your customer support dashboard
           </p>
         </div>
+
+        {/* Error Alert Banner */}
+        {errorMsg && (
+          <div className="mb-6 p-4 rounded-xl border border-red-500/20 bg-red-500/5 dark:bg-red-500/10 text-red-600 dark:text-red-400 flex gap-3 animate-fade-in">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-bold uppercase tracking-wider">{errorMsg}</h4>
+              {errorDetails && (
+                <p className="text-[11px] font-normal leading-relaxed mt-1 text-red-500/80 dark:text-red-400/80 break-words font-mono">
+                  {errorDetails}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Identity Providers Buttons */}
         <div className="space-y-3 mb-6">
