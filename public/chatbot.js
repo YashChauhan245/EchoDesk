@@ -222,60 +222,60 @@
         padding: 20px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
         background: #f8fafc;
       }
 
       .echodesk-messages::-webkit-scrollbar {
-        width: 5px;
+        width: 4px;
       }
 
       .echodesk-messages::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
+        background: rgba(0, 0, 0, 0.08);
+        border-radius: 10px;
       }
 
       .echodesk-msg {
-        max-width: 80%;
+        max-width: 85%;
         padding: 10px 14px;
-        font-size: 13.5px;
-        line-height: 1.45;
+        font-size: 13px;
+        line-height: 1.5;
         word-wrap: break-word;
-        animation: echodesk-msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: echodesk-msgIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
 
       @keyframes echodesk-msgIn {
-        from { opacity: 0; transform: translateY(6px); }
-        to { opacity: 1; transform: translateY(0); }
+        from { opacity: 0; transform: translateY(8px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
       }
 
       .echodesk-msg-user {
         align-self: flex-end;
         background: ${widgetColor};
         color: white;
-        border-radius: 16px 16px 4px 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border-radius: 12px 12px 2px 12px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
       }
 
       .echodesk-msg-assistant {
         align-self: flex-start;
         background: white;
         color: #1e293b;
-        border: 1px solid rgba(0,0,0,0.05);
-        border-radius: 16px 16px 16px 4px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        border: 1px solid rgba(0,0,0,0.015);
+        border-radius: 12px 12px 12px 2px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
       }
 
       .echodesk-typing {
         align-self: flex-start;
         background: white;
-        border: 1px solid rgba(0,0,0,0.05);
-        border-radius: 16px 16px 16px 4px;
+        border: 1px solid rgba(0,0,0,0.015);
+        border-radius: 12px 12px 12px 2px;
         padding: 12px 16px;
         display: flex;
         gap: 4px;
         align-items: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
       }
 
       .echodesk-dot {
@@ -283,7 +283,7 @@
         height: 6px;
         border-radius: 50%;
         background: #94a3b8;
-        animation: echodesk-bounce 1.2s ease-in-out infinite;
+        animation: echodesk-bounce 1.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
       }
 
       .echodesk-dot:nth-child(2) { animation-delay: 0.2s; }
@@ -291,7 +291,7 @@
 
       @keyframes echodesk-bounce {
         0%, 60%, 100% { transform: translateY(0); }
-        30% { transform: translateY(-4px); }
+        30% { transform: translateY(-5px); }
       }
 
       .echodesk-input-area {
@@ -308,19 +308,19 @@
         flex: 1;
         padding: 10px 14px;
         border: 1px solid #e2e8f0;
-        border-radius: 10px;
+        border-radius: 8px;
         font-size: 13px;
         outline: none;
         background: #f8fafc;
         color: #1e293b;
-        transition: all 0.2s ease;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         font-family: inherit;
       }
 
       .echodesk-input:focus {
         border-color: ${widgetColor};
         background: white;
-        box-shadow: 0 0 0 3px ${widgetColor}20;
+        box-shadow: 0 0 0 2px ${widgetColor}15;
       }
 
       .echodesk-input::placeholder {
@@ -337,12 +337,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s ease;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         flex-shrink: 0;
       }
 
       .echodesk-send:hover {
-        transform: scale(1.04);
+        transform: scale(1.02) translateY(-0.5px);
         filter: brightness(1.05);
       }
 

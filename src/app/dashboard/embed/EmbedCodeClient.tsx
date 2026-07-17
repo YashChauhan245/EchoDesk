@@ -59,20 +59,23 @@ export default function EmbedCodeClient({
   }
 
   return (
-    <div className="animate-fade-in space-y-8 max-w-4xl">
+    <div className="animate-fade-in space-y-8 max-w-4xl relative">
+      {/* Soft header radial glow backdrop */}
+      <div className="absolute top-0 left-0 right-0 h-[220px] bg-gradient-to-b from-indigo-500/[0.02] dark:from-indigo-500/[0.04] to-transparent pointer-events-none -z-10 blur-xl" />
+
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0f0f15] dark:text-white mb-2">
           Embed Code
         </h1>
-        <p className="text-sm text-[#5f6368] dark:text-[#94a3b8]">
+        <p className="text-xs sm:text-sm text-[#5f6368] dark:text-[#94a3b8]">
           Add your AI customer support chatbot widget to any website with a single script tag.
         </p>
       </div>
 
       {/* Chatbot Selector */}
       {chatbots.length > 1 && (
-        <div className="glass-card p-4 sm:p-5 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm max-w-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="glass-card p-6 sm:p-7 shadow-sm max-w-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Bot className="w-5 h-5 text-[#6366f1]" />
             <div>
@@ -88,7 +91,7 @@ export default function EmbedCodeClient({
             <select
               value={selectedBotId}
               onChange={(e) => setSelectedBotId(e.target.value)}
-              className="border border-black/[0.08] dark:border-white/[0.08] text-xs font-semibold rounded-lg px-3 py-2 outline-none focus:border-[#6366f1] transition-colors cursor-pointer"
+              className="border border-black/[0.015] dark:border-white/[0.015] text-xs font-semibold rounded-lg px-3 py-2 outline-none focus:border-[#6366f1] transition-colors cursor-pointer"
               style={{
                 color: "var(--text-primary)",
                 backgroundColor: "var(--bg-secondary)",
@@ -119,10 +122,10 @@ export default function EmbedCodeClient({
       )}
 
       {/* Embed Code Card */}
-      <div className="glass-card p-4 sm:p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm max-w-3xl relative">
+      <div className="glass-card p-6 sm:p-7 shadow-sm max-w-3xl relative">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
+            <div className="w-7 h-7 rounded-lg bg-white dark:bg-[#0c0c14] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-black dark:text-white">
               <Terminal className="w-4 h-4" />
             </div>
             <div>
@@ -135,8 +138,8 @@ export default function EmbedCodeClient({
             onClick={handleCopy}
             className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-sm w-full sm:w-auto ${
               copied
-                ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/30"
-                : "bg-white dark:bg-[#0c0c14] text-[#5f6368] dark:text-[#94a3b8] border border-black/[0.08] dark:border-white/[0.08] hover:bg-neutral-50 dark:hover:bg-white/[0.02] hover:text-black dark:hover:text-white"
+                ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-900/10"
+                : "btn-secondary"
             }`}
           >
             {copied ? (
@@ -168,9 +171,9 @@ export default function EmbedCodeClient({
       </div>
 
       {/* Installation Milestones */}
-      <div className="glass-card p-4 sm:p-6 border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] shadow-sm max-w-3xl relative">
+      <div className="glass-card p-6 sm:p-7 shadow-sm max-w-3xl relative">
         <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-6 flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-center text-black dark:text-white">
+          <div className="w-7 h-7 rounded-lg bg-white dark:bg-[#0c0c14] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-black dark:text-white">
             <Info className="w-4 h-4" />
           </div>
           How to Deploy
@@ -180,7 +183,7 @@ export default function EmbedCodeClient({
           {/* Step 1 */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className="w-6 h-6 rounded-full bg-black dark:bg-white flex items-center justify-center text-xs font-bold text-white dark:text-black">
+              <span className="w-6 h-6 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-xs font-bold text-[#0f0f15] dark:text-white">
                 1
               </span>
               <h4 className="text-xs font-semibold text-[#0f0f15] dark:text-white uppercase tracking-wider">Copy code</h4>
@@ -193,7 +196,7 @@ export default function EmbedCodeClient({
           {/* Step 2 */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className="w-6 h-6 rounded-full bg-black dark:bg-white flex items-center justify-center text-xs font-bold text-white dark:text-black">
+              <span className="w-6 h-6 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-xs font-bold text-[#0f0f15] dark:text-white">
                 2
               </span>
               <h4 className="text-xs font-semibold text-[#0f0f15] dark:text-white uppercase tracking-wider">Paste in HTML</h4>
@@ -206,7 +209,7 @@ export default function EmbedCodeClient({
           {/* Step 3 */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className="w-6 h-6 rounded-full bg-black dark:bg-white flex items-center justify-center text-xs font-bold text-white dark:text-black">
+              <span className="w-6 h-6 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-xs font-bold text-[#0f0f15] dark:text-white">
                 3
               </span>
               <h4 className="text-xs font-semibold text-[#0f0f15] dark:text-white uppercase tracking-wider">Instant Chat</h4>

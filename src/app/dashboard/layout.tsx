@@ -20,7 +20,10 @@ export default async function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-[#f8fafc] dark:bg-[#030307] grid-bg">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#fafafa] dark:bg-[#09090b] relative overflow-hidden">
+      {/* Subtle Noise overlay texture */}
+      <div className="noise-overlay" />
+
       {/* Client-side navigation & mobile drawer */}
       <SidebarNav session={clientSession} />
 

@@ -57,9 +57,9 @@ export default function SidebarNav({ session }: SidebarNavProps) {
   ];
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white dark:bg-[#08080d] border-r border-black/[0.04] dark:border-white/[0.04] transition-colors duration-300">
+    <div className="flex flex-col h-full bg-[#fafafa] dark:bg-[#0e0e12] border-r border-black/[0.03] dark:border-white/[0.04] transition-colors duration-300">
       {/* Logo */}
-      <div className="p-4 border-b border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between">
+      <div className="p-4 border-b border-black/[0.015] dark:border-white/[0.015] flex items-center justify-between">
         <Link href="/" className="flex items-center">
           <div className="w-32 h-10 overflow-hidden flex items-center justify-center relative">
             <img 
@@ -93,36 +93,31 @@ export default function SidebarNav({ session }: SidebarNavProps) {
               key={item.href}
               href={item.href}
               onClick={() => setIsOpen(false)}
-              className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all group relative ${
+              className={`flex items-center justify-between px-3.5 py-2 rounded-md text-xs font-medium transition-all duration-180 ease-out group relative ${
                 isActive 
-                  ? "bg-neutral-100 dark:bg-white/[0.06] text-[#0f0f15] dark:text-[#f8fafc] border border-black/[0.03] dark:border-white/[0.04] shadow-sm" 
-                  : "text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-white/[0.02]"
+                  ? "bg-black/[0.04] dark:bg-white/[0.05] text-[#0f0f15] dark:text-[#f8fafc] border border-black/[0.04] dark:border-white/[0.08] shadow-[inset_0_1px_1px_rgba(0,0,0,0.015)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)]" 
+                  : "text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:bg-black/[0.015] dark:hover:bg-white/[0.02]"
               }`}
             >
               <div className="flex items-center gap-3">
                 <Icon className={`w-4 h-4 transition-colors ${
-                  isActive ? "text-black dark:text-white" : "text-[#94a3b8] dark:text-[#475569] group-hover:text-[#5f6368] dark:group-hover:text-[#94a3b8]"
+                  isActive ? "text-black dark:text-white" : "text-[#94a3b8] dark:text-[#475569] group-hover:text-black dark:group-hover:text-white"
                 }`} />
                 <span>{item.label}</span>
               </div>
-              
-              {/* Active Indicator Pin */}
-              {isActive && (
-                <div className="w-1.5 h-1.5 rounded-full bg-black dark:bg-white" />
-              )}
             </Link>
           );
         })}
       </nav>
 
       {/* User Info & Signout Footer */}
-      <div className="p-4 border-t border-black/[0.04] dark:border-white/[0.04] bg-neutral-50/50 dark:bg-[#0c0c14]/50">
+      <div className="p-4 border-t border-black/[0.015] dark:border-white/[0.015] bg-[#fafafa]/50 dark:bg-[#09090b]/30">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-xs font-bold shadow-sm">
+          <div className="w-7 h-7 rounded-md bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-xs font-bold border border-black/[0.03] dark:border-white/[0.06] shadow-sm flex-shrink-0">
             {session.name?.charAt(0)?.toUpperCase() || "U"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-[#0f0f15] dark:text-[#f8fafc] truncate">
+            <p className="text-xs font-medium text-[#0f0f15] dark:text-[#f8fafc] truncate">
               {session.name}
             </p>
             <p className="text-[10px] text-[#5f6368] dark:text-[#94a3b8] truncate">
@@ -144,7 +139,7 @@ export default function SidebarNav({ session }: SidebarNavProps) {
   return (
     <>
       {/* Mobile Top Header */}
-      <header className="lg:hidden fixed top-0 w-full z-40 border-b border-black/[0.04] dark:border-white/[0.04] bg-white/80 dark:bg-[#030307]/80 backdrop-blur-xl h-14 flex items-center justify-between px-4">
+      <header className="lg:hidden fixed top-0 w-full z-40 border-b border-black/[0.015] dark:border-white/[0.015] bg-white/85 dark:bg-[#09090b]/85 backdrop-blur-md h-14 flex items-center justify-between px-4">
         <Link href="/dashboard" className="flex items-center">
           <div className="w-32 h-10 overflow-hidden flex items-center justify-center relative">
             <img 

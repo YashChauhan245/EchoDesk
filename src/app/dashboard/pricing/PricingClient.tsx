@@ -223,20 +223,29 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
           return (
             <div
               key={plan.id}
-              className={`glass-card p-6 sm:p-8 flex flex-col justify-between border relative overflow-hidden transition-all duration-300 ${
+              className={`glass-card p-8 flex flex-col justify-between border relative overflow-hidden transition-all duration-300 ${
                 plan.popular
-                  ? "border-[#6366f1] shadow-[0_0_24px_rgba(99,102,241,0.06)] dark:shadow-[0_0_32px_rgba(99,102,241,0.08)] bg-white dark:bg-[#0c0c16]/90 lg:scale-[1.03] z-10"
-                  : "border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14]"
+                  ? "border-[#6366f1]/25 shadow-[0_25px_50px_-12px_rgba(99,102,241,0.12)] bg-[#fafafa] dark:bg-[#0c0c16]/95 lg:scale-[1.05] lg:-translate-y-2 z-10"
+                  : isCurrent
+                    ? "border-[#10b981]/30 bg-[#fafafa] dark:bg-[#09090f]"
+                    : "border-black/[0.015] dark:border-white/[0.015] bg-[#fafafa] dark:bg-[#09090f]"
               }`}
             >
               {/* Glow Accent for Popular */}
               {plan.popular && (
-                <div className="absolute top-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-[#6366f1] to-transparent" />
+                <div className="absolute top-0 right-0 left-0 h-[2px] bg-[#6366f1]/20" />
+              )}
+
+              {/* Active Plan Badge */}
+              {isCurrent && (
+                <div className="absolute top-4 left-4 flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-[#10b981]/20 bg-[#10b981]/5 text-[#10b981] text-[9px] font-semibold uppercase tracking-wider">
+                  Active Plan
+                </div>
               )}
 
               {/* Popular Badge */}
               {plan.popular && (
-                <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#6366f1]/20 bg-[#6366f1]/5 text-[#6366f1] text-[10px] font-bold uppercase tracking-wider">
+                <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#6366f1]/15 bg-[#6366f1]/5 text-[#6366f1] text-[10px] font-bold uppercase tracking-wider">
                   <Sparkles className="w-3 h-3" />
                   Most Popular
                 </div>
@@ -262,7 +271,7 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
                 </div>
 
                 {/* Divider */}
-                <div className="h-[1px] bg-black/[0.05] dark:bg-white/[0.06]" />
+                <div className="h-[1px] bg-black/[0.015] dark:bg-white/[0.015]" />
 
                 {/* Features */}
                 <ul className="space-y-3.5">

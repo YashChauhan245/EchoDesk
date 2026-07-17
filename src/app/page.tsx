@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import Counter from "@/components/Counter";
 import { Menu, X } from "lucide-react";
 import {
   ArrowRight,
@@ -29,12 +30,67 @@ interface Message {
   sender: "bot" | "user";
   text: string;
   isTyping?: boolean;
+  isResponding?: boolean;
 }
+
+// Smooth scroll reveal section using IntersectionObserver
+interface RevealSectionProps {
+  children: React.ReactNode;
+  className?: string;
+  id?: string;
+}
+
+function RevealSection({ children, className = "", id }: RevealSectionProps) {
+  const [ref, setRef] = useState<HTMLElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (!ref) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.05, rootMargin: "0px 0px -80px 0px" }
+    );
+    observer.observe(ref);
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return (
+    <section
+      ref={setRef}
+      id={id}
+      className={`${className} transition-all duration-[1000ms] cubic-bezier(0.16, 1, 0.3, 1) ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+    >
+      {children}
+    </section>
+  );
+}
+
+
 
 export default function LandingPage() {
   const [copied, setCopied] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [heroMousePos, setHeroMousePos] = useState({ x: 0, y: 0 });
+
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Parallax scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Simulated chat messages
   const [messages, setMessages] = useState<Message[]>([
@@ -61,46 +117,104 @@ export default function LandingPage() {
     { sender: "bot", text: "Exactly! It runs instantly, trained on your custom FAQs and docs. Try it out!", delay: 2000 }
   ];
 
+  // Auto-scroll messages internally within the container (never scrolls the page)
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   useEffect(() => {
     if (currentStep >= conversationScript.length) {
       // Loop conversation back after a delay
       const resetTimeout = setTimeout(() => {
         setMessages([{ id: 1, sender: "bot", text: "Hello! Welcome to EchoDesk support. How can I help you today? 👋" }]);
         setCurrentStep(0);
-      }, 7000);
+      }, 8000);
       return () => clearTimeout(resetTimeout);
     }
 
     const nextMsg = conversationScript[currentStep];
+    let typewriterInterval: NodeJS.Timeout;
+    let nextStepTimeout: NodeJS.Timeout;
+    let typewriterTimeout: NodeJS.Timeout;
 
-    // 1. Show typing indicator
+    const isUser = nextMsg.sender === "user";
+    const typingDuration = isUser ? 100 : 900; // 900ms fits the 700-1200ms window perfectly
+
+    // 1. Show typing indicator (skip for user messages)
     const typingTimeout = setTimeout(() => {
-      setMessages(prev => [
-        ...prev,
-        { id: Date.now(), sender: nextMsg.sender as "user" | "bot", text: "...", isTyping: true }
-      ]);
+      const tempId = Date.now();
+      
+      if (isUser) {
+        // User message enters directly
+        setMessages(prev => [
+          ...prev,
+          { id: tempId, sender: "user", text: nextMsg.text }
+        ]);
+        nextStepTimeout = setTimeout(() => {
+          setCurrentStep(prev => prev + 1);
+        }, 1800);
+      } else {
+        // Assistant message shows typing indicator
+        setMessages(prev => [
+          ...prev,
+          { id: tempId, sender: "bot", text: "", isTyping: true }
+        ]);
 
-      // 2. Replace typing with real text
-      const sendTimeout = setTimeout(() => {
-        setMessages(prev =>
-          prev.map(m => m.isTyping ? { ...m, text: nextMsg.text, isTyping: false } : m)
-        );
-        setCurrentStep(prev => prev + 1);
-      }, 1000);
+        // 2. Clear typing indicator and start typewriter
+        typewriterTimeout = setTimeout(() => {
+          setMessages(prev =>
+            prev.map(m => m.id === tempId ? { ...m, isTyping: false, isResponding: true } : m)
+          );
 
-      return () => clearTimeout(sendTimeout);
+          let currentLength = 0;
+          const fullText = nextMsg.text;
+          
+          typewriterInterval = setInterval(() => {
+            currentLength++;
+            setMessages(prev =>
+              prev.map(m => m.id === tempId ? { ...m, text: fullText.substring(0, currentLength) } : m)
+            );
+
+            if (currentLength >= fullText.length) {
+              clearInterval(typewriterInterval);
+              setMessages(prev =>
+                prev.map(m => m.id === tempId ? { ...m, isResponding: false } : m)
+              );
+              nextStepTimeout = setTimeout(() => {
+                setCurrentStep(prev => prev + 1);
+              }, 1800);
+            }
+          }, 20);
+
+        }, typingDuration);
+      }
 
     }, nextMsg.delay);
 
-    return () => clearTimeout(typingTimeout);
+    return () => {
+      clearTimeout(typingTimeout);
+      clearTimeout(typewriterTimeout);
+      clearInterval(typewriterInterval);
+      clearTimeout(nextStepTimeout);
+    };
   }, [currentStep]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#030307] text-[#0f0f15] dark:text-[#f8fafc] grid-bg selection:bg-black/5 overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-white dark:bg-[#030307] text-[#0f0f15] dark:text-[#f8fafc] selection:bg-black/5 overflow-x-hidden transition-colors duration-300 relative">
+      {/* Background Noise Texture */}
+      <div className="noise-overlay" />
+      
+      {/* Subtle Floating blurred lights */}
+      <div className="absolute top-[12%] left-[-10%] w-[450px] sm:w-[600px] h-[450px] sm:h-[600px] rounded-full bg-indigo-500/[0.012] dark:bg-indigo-500/[0.006] blur-[120px] pointer-events-none animate-float-slow" style={{ transform: `translateY(${scrollY * -0.05}px)` }} />
+      <div className="absolute top-[42%] right-[-10%] w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] rounded-full bg-purple-500/[0.012] dark:bg-purple-500/[0.006] blur-[140px] pointer-events-none animate-float-slower" style={{ transform: `translateY(${scrollY * 0.08}px)` }} />
+      <div className="absolute top-[78%] left-[-5%] w-[450px] sm:w-[600px] h-[450px] sm:h-[600px] rounded-full bg-emerald-500/[0.01] dark:bg-emerald-500/[0.005] blur-[120px] pointer-events-none animate-float-slow" style={{ transform: `translateY(${scrollY * -0.04}px)` }} />
+
       <div className="linear-glow" />
 
       {/* ---- Navigation ---- */}
-      <nav className="fixed top-0 w-full z-50 border-b border-black/[0.04] dark:border-white/[0.04] bg-white/80 dark:bg-[#030307]/80 backdrop-blur-xl transition-all duration-300">
+      <nav className="fixed top-0 w-full z-50 border-b border-black/[0.015] dark:border-white/[0.015] bg-white/80 dark:bg-[#030307]/80 backdrop-blur-xl transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <div className="w-36 sm:w-48 h-12 overflow-hidden flex items-center justify-center relative">
@@ -131,7 +245,7 @@ export default function LandingPage() {
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-[#5f6368] dark:text-[#94a3b8] hover:bg-black/[0.03] dark:hover:bg-white/[0.03] transition-colors"
+              className="md:hidden p-2 rounded-lg text-[#5f6368] dark:text-[#94a3b8] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -141,19 +255,19 @@ export default function LandingPage() {
 
         {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-black/[0.04] dark:border-white/[0.04] bg-white/95 dark:bg-[#030307]/95 backdrop-blur-xl animate-fade-in">
+          <div className="md:hidden border-t border-black/[0.015] dark:border-white/[0.015] bg-white/95 dark:bg-[#030307]/95 backdrop-blur-xl animate-fade-in">
             <div className="px-4 py-4 space-y-1">
               {[{label: "Features", href: "#features"}, {label: "How It Works", href: "#workflow"}, {label: "Subscription", href: "#pricing"}, {label: "Testimonials", href: "#testimonials"}].map((item) => (
                 <a
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2.5 rounded-lg text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+                  className="block px-3 py-2.5 rounded-lg text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-colors"
                 >
                   {item.label}
                 </a>
               ))}
-              <div className="pt-3 mt-2 border-t border-black/[0.04] dark:border-white/[0.04] flex flex-col gap-2">
+              <div className="pt-3 mt-2 border-t border-black/[0.015] dark:border-white/[0.015] flex flex-col gap-2">
                 <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white px-3 py-2 transition-colors">Sign in</Link>
                 <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="btn-primary !py-2.5 !px-4 !text-sm text-center">
                   Get Started <ChevronRight className="w-4 h-4" />
@@ -163,141 +277,169 @@ export default function LandingPage() {
           </div>
         )}
       </nav>
+      {/* ---- Hero Section Container with Grid and Radial Gradient ---- */}
+      <div 
+        onMouseMove={(e) => {
+          const { clientX, clientY, currentTarget } = e;
+          const { width, height, left, top } = currentTarget.getBoundingClientRect();
+          const x = (clientX - left - width / 2) / (width / 2); // -1 to 1
+          const y = (clientY - top - height / 2) / (height / 2); // -1 to 1
+          setHeroMousePos({ x, y });
+        }}
+        onMouseLeave={() => setHeroMousePos({ x: 0, y: 0 })}
+        className="relative w-full grid-bg border-b border-black/[0.015] dark:border-white/[0.015]"
+      >
+        <div className="hero-gradient" />
+        
+        <section className="relative pt-24 sm:pt-32 pb-20 sm:pb-28 px-4 sm:px-6 max-w-7xl mx-auto z-10">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[800px] h-[200px] sm:h-[350px] bg-indigo-500/[0.015] dark:bg-indigo-500/[0.02] rounded-full blur-[140px] pointer-events-none" style={{ transform: `translate(-50%, -50%) translateY(${scrollY * 0.1}px)` }} />
+          <div className="absolute top-[45%] right-10 w-[150px] sm:w-[300px] h-[150px] sm:h-[300px] bg-purple-500/[0.01] dark:bg-purple-500/[0.015] rounded-full blur-[100px] pointer-events-none" style={{ transform: `translateY(${scrollY * -0.06}px)` }} />
 
-      {/* ---- Hero Section ---- */}
-      <section className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 px-4 sm:px-6 max-w-7xl mx-auto">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[800px] h-[200px] sm:h-[350px] bg-neutral-100/50 dark:bg-neutral-900/10 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute top-[45%] right-10 w-[150px] sm:w-[300px] h-[150px] sm:h-[300px] bg-neutral-50/50 dark:bg-neutral-900/5 rounded-full blur-[100px] pointer-events-none" />
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
-        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-
-          {/* Hero Left Content */}
-          <div className="lg:col-span-7 flex flex-col items-start text-left">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-black/[0.05] dark:border-white/[0.08] bg-black/[0.01] dark:bg-white/[0.01] mb-6 animate-fade-in">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span className="text-xs text-[#5f6368] dark:text-[#94a3b8] font-medium tracking-wide">
-                Next-Gen AI Customer Support
-              </span>
-            </div>
-
-            {/* Title */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-[1.1] mb-6 animate-slide-up text-[#0f0f15] dark:text-white">
-              Instant customer support,
-              <span className="block mt-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">automated by AI.</span>
-            </h1>
-
-            {/* Description */}
-            <p className="text-base sm:text-lg text-[#5f6368] dark:text-[#94a3b8] max-w-xl mb-8 leading-relaxed animate-slide-up">
-              Train intelligent support chatbots on your product docs, FAQs, and files. Deploy to any website in under 10 minutes with a single line of script.
-            </p>
-
-            {/* Actions */}
-            <div className="flex flex-wrap items-center gap-4 mb-10 w-full sm:w-auto animate-slide-up">
-              <Link href="/login" className="btn-primary !py-3 !px-6 !text-sm group">
-                Start Building Free
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <a href="#features" className="btn-secondary !py-3 !px-6 !text-sm">
-                Explore Features
-              </a>
-            </div>
-
-            {/* Copy Snippet Panel */}
-            <div className="w-full max-w-lg bg-[#f9fafb] dark:bg-[#0c0c14] border border-black/[0.05] dark:border-white/[0.06] rounded-xl p-4 shadow-sm relative overflow-hidden group">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5 text-xs text-[#5f6368] dark:text-[#94a3b8] font-mono">
-                  <Terminal className="w-3.5 h-3.5 text-[#5f6368] dark:text-[#94a3b8]" />
-                  <span>install-widget.html</span>
-                </div>
-                <button
-                  onClick={copyToClipboard}
-                  className="p-1.5 rounded-md hover:bg-black/[0.03] dark:hover:bg-white/[0.03] text-[#5f6368] dark:text-[#94a3b8] hover:text-black dark:hover:text-white transition-colors"
-                  title="Copy widget script tag"
-                >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
+            {/* Hero Left Content */}
+            <div 
+              className="lg:col-span-7 flex flex-col items-start text-left transition-transform duration-500 ease-out"
+              style={{ transform: `translate3d(${heroMousePos.x * -2}px, ${heroMousePos.y * -2}px, 0)` }}
+            >
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-black/[0.02] dark:border-white/[0.03] bg-black/[0.01] dark:bg-white/[0.01] mb-6 animate-fade-in">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-xs text-[#5f6368] dark:text-[#94a3b8] font-medium tracking-wide">
+                  Next-Gen AI Customer Support
+                </span>
               </div>
-              <pre className="text-xs font-mono text-[#5f6368] overflow-x-auto leading-relaxed select-all">
-                <code>
-                  <span className="text-[#94a3b8]">&lt;!-- Add to &lt;body&gt; --&gt;</span>{"\n"}
-                  {scriptSnippet}
-                </code>
-              </pre>
-            </div>
-          </div>
 
-          {/* Hero Right Content (Floating Chat Simulator) */}
-          <div className="lg:col-span-5 w-full flex justify-center lg:justify-end animate-float">
-            <div className="w-full max-w-[380px] bg-white dark:bg-[#0c0c14] border border-black/[0.06] dark:border-white/[0.04] rounded-2xl shadow-xl overflow-hidden relative">
+              {/* Title */}
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter leading-[1.1] mb-6 animate-slide-up text-[#0f0f15] dark:text-white">
+                Instant customer support,
+                <span className="block mt-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">automated by AI.</span>
+              </h1>
 
-              {/* Header */}
-              <div className="p-4 border-b border-black/[0.05] dark:border-white/[0.06] bg-neutral-50/50 dark:bg-white/[0.02] flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-black dark:bg-white flex items-center justify-center shadow-sm">
-                    <Bot className="w-5 h-5 text-white dark:text-black" />
+              {/* Description */}
+              <p className="text-base sm:text-lg text-[#5f6368] dark:text-[#94a3b8] max-w-xl mb-8 leading-relaxed animate-slide-up">
+                Train intelligent support chatbots on your product docs, FAQs, and files. Deploy to any website in under 10 minutes with a single line of script.
+              </p>
+
+              {/* Actions */}
+              <div className="flex flex-wrap items-center gap-4 mb-10 w-full sm:w-auto animate-slide-up">
+                <Link href="/login" className="btn-primary !py-3 !px-6 !text-sm group">
+                  Start Building Free
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <a href="#features" className="btn-secondary !py-3 !px-6 !text-sm">
+                  Explore Features
+                </a>
+              </div>
+
+              {/* Copy Snippet Panel */}
+              <div className="w-full max-w-lg bg-[#fafafa] dark:bg-[#09090f] border border-black/[0.02] dark:border-white/[0.02] rounded-xl p-4 shadow-sm relative overflow-hidden group">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5 text-xs text-[#5f6368] dark:text-[#94a3b8] font-mono">
+                    <Terminal className="w-3.5 h-3.5 text-[#5f6368] dark:text-[#94a3b8]" />
+                    <span>install-widget.html</span>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-[#0f0f15] dark:text-white">EchoDesk AI</h4>
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[11px] text-[#5f6368] dark:text-[#94a3b8]">Typically replies instantly</span>
+                  <button
+                    onClick={copyToClipboard}
+                    className="p-1.5 rounded-md hover:bg-black/[0.02] dark:hover:bg-white/[0.02] text-[#5f6368] dark:text-[#94a3b8] hover:text-black dark:hover:text-white transition-colors"
+                    title="Copy widget script tag"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+                <pre className="text-xs font-mono text-[#5f6368] overflow-x-auto leading-relaxed select-all">
+                  <code>
+                    <span className="text-[#94a3b8]">&lt;!-- Add to &lt;body&gt; --&gt;</span>{"\n"}
+                    {scriptSnippet}
+                  </code>
+                </pre>
+              </div>
+            </div>
+
+            {/* Hero Right Content (Floating Chat Simulator with Parallax) */}
+            <div 
+              className="lg:col-span-5 w-full flex justify-center lg:justify-end transition-transform duration-500 ease-out"
+              style={{ transform: `translate3d(${heroMousePos.x * 4}px, ${scrollY * 0.05 + heroMousePos.y * 4}px, 0)` }}
+            >
+              <div className="w-full max-w-[380px] bg-[#fafafa] dark:bg-[#09090f] border border-black/[0.025] dark:border-white/[0.025] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.35)] overflow-hidden relative">
+
+                {/* Header */}
+                <div className="p-4 border-b border-black/[0.015] dark:border-white/[0.015] bg-[#fafafa] dark:bg-[#09090f] flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-black dark:bg-white flex items-center justify-center shadow-sm">
+                      <Bot className="w-5 h-5 text-white dark:text-black" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-[#0f0f15] dark:text-white">EchoDesk AI</h4>
+                      <div className="flex items-center gap-1.5">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                        </span>
+                        <span className="text-[11px] text-[#5f6368] dark:text-[#94a3b8]">Typically replies instantly</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Chat Messages Simulator */}
-              <div className="p-4 h-[280px] overflow-y-auto flex flex-col gap-3 font-sans text-xs scrollbar-thin bg-[#fcfcfd] dark:bg-[#08080d]">
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex flex-col max-w-[80%] ${msg.sender === "user" ? "self-end items-end" : "self-start items-start"
-                      } animate-fade-in`}
-                  >
+                {/* Chat Messages Simulator */}
+                <div ref={chatContainerRef} className="p-4 h-[280px] overflow-y-auto flex flex-col gap-3 font-sans text-xs scrollbar-thin bg-[#f5f5f7]/30 dark:bg-[#06060a]/30">
+                  {messages.map((msg) => (
                     <div
-                      className={`p-3 rounded-2xl ${msg.sender === "user"
-                          ? "bg-black dark:bg-white text-white dark:text-black rounded-tr-none"
-                          : "bg-white dark:bg-[#0c0c14] text-[#0f0f15] dark:text-[#f8fafc] border border-black/[0.05] dark:border-white/[0.06] rounded-tl-none shadow-sm"
+                      key={msg.id}
+                      className={`flex flex-col max-w-[80%] ${msg.sender === "user" ? "self-end items-end animate-message-bubble-user" : "self-start items-start animate-message-bubble-bot"
                         }`}
                     >
-                      {msg.isTyping ? (
-                        <div className="flex items-center gap-1.5 py-1 px-2">
-                          <span className="w-1.5 h-1.5 bg-[#94a3b8] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <span className="w-1.5 h-1.5 bg-[#94a3b8] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <span className="w-1.5 h-1.5 bg-[#94a3b8] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                        </div>
-                      ) : (
-                        msg.text
-                      )}
+                      <div
+                        className={`p-3 rounded-2xl ${msg.sender === "user"
+                            ? "bg-black dark:bg-white text-white dark:text-black rounded-tr-none"
+                            : "bg-[#ffffff] dark:bg-[#0e0e16] text-[#0f0f15] dark:text-[#f8fafc] border border-black/[0.015] dark:border-white/[0.015] rounded-tl-none shadow-sm"
+                          }`}
+                      >
+                        {msg.isTyping ? (
+                          <div className="flex items-center gap-1.5 py-1 px-2">
+                            <span className="w-1.5 h-1.5 bg-[#94a3b8] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <span className="w-1.5 h-1.5 bg-[#94a3b8] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <span className="w-1.5 h-1.5 bg-[#94a3b8] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </div>
+                        ) : (
+                          <>
+                            <span>{msg.text}</span>
+                            {msg.isResponding && <span className="inline-block w-1.5 h-3 ml-0.5 bg-current animate-blink" />}
+                          </>
+                        )}
+                      </div>
+                      <span className="text-[9px] text-[#94a3b8] mt-1 px-1">
+                        {msg.sender === "user" ? "You" : "EchoDesk AI"}
+                      </span>
                     </div>
-                    <span className="text-[9px] text-[#94a3b8] mt-1 px-1">
-                      {msg.sender === "user" ? "You" : "EchoDesk AI"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Chat Input Mock */}
-              <div className="p-3 border-t border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] flex items-center gap-2">
-                <div className="flex-1 bg-neutral-50 dark:bg-white/[0.02] border border-black/[0.04] dark:border-white/[0.06] rounded-full px-3 py-1.5 text-xs text-[#94a3b8]">
-                  Ask support anything...
+                  ))}
                 </div>
-                <div className="w-7 h-7 rounded-full bg-black dark:bg-white flex items-center justify-center text-white dark:text-black">
-                  <ArrowRight className="w-3.5 h-3.5" />
+
+                {/* Chat Input Mock */}
+                <div className="p-3 border-t border-black/[0.015] dark:border-white/[0.015] bg-[#fafafa] dark:bg-[#09090f] flex items-center gap-2">
+                  <input
+                    type="text"
+                    disabled
+                    placeholder="Ask support anything..."
+                    className="flex-1 bg-white dark:bg-[#0e0e16] border border-black/[0.015] dark:border-white/[0.015] rounded-full px-3 py-1.5 text-xs text-[#94a3b8] outline-none echodesk-breathe-placeholder"
+                  />
+                  <div className="w-7 h-7 rounded-full bg-black dark:bg-white flex items-center justify-center text-white dark:text-black flex-shrink-0 active:scale-90 transition-transform">
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
 
       {/* ---- Trusted By Strip ---- */}
-      <section className="py-8 sm:py-10 px-4 sm:px-6 border-t border-black/[0.03] dark:border-white/[0.04]">
+      <RevealSection className="py-16 sm:py-20 px-4 sm:px-6 border-t border-black/[0.015] dark:border-white/[0.015]">
         <div className="max-w-5xl mx-auto">
           <p className="text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-[#94a3b8] mb-6">Trusted by forward-thinking teams</p>
           <div className="flex flex-wrap items-center justify-center gap-x-6 sm:gap-x-12 gap-y-3 sm:gap-y-4">
@@ -308,10 +450,10 @@ export default function LandingPage() {
             ))}
           </div>
         </div>
-      </section>
+      </RevealSection>
 
       {/* ---- Stats Counter Row ---- */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto">
+      <RevealSection className="py-16 sm:py-20 px-4 sm:px-6 max-w-7xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
             { icon: <Users className="w-5 h-5" />, value: "2,400+", label: "Active businesses" },
@@ -320,21 +462,26 @@ export default function LandingPage() {
             { icon: <Star className="w-5 h-5" />, value: "4.9/5", label: "Customer rating" },
           ].map((stat) => (
             <div key={stat.label} className="glass-card p-6 text-center group">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 dark:bg-indigo-400/10 flex items-center justify-center text-indigo-500 dark:text-indigo-400 mx-auto mb-3 group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-xl bg-black/[0.015] dark:bg-white/[0.015] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-indigo-500 dark:text-indigo-400 mx-auto mb-3 group-hover:scale-110 transition-transform">
                 {stat.icon}
               </div>
-              <p className="text-2xl sm:text-3xl font-extrabold text-[#0f0f15] dark:text-white tracking-tight">{stat.value}</p>
+              <p className="text-2xl sm:text-3xl font-extrabold text-[#0f0f15] dark:text-white tracking-tight">
+                {stat.label === "Active businesses" && <Counter value={2400} format={(v) => Math.floor(v).toLocaleString() + "+"} />}
+                {stat.label === "AI messages sent" && <Counter value={12} format={(v) => Math.floor(v) + "M+"} />}
+                {stat.label === "Average setup time" && <Counter value={8} format={(v) => "< " + Math.floor(v) + " min"} />}
+                {stat.label === "Customer rating" && <Counter value={4.9} format={(v) => v.toFixed(1) + "/5"} />}
+              </p>
               <p className="text-xs text-[#94a3b8] mt-1">{stat.label}</p>
             </div>
           ))}
         </div>
-      </section>
+      </RevealSection>
 
       {/* ---- Features Section ---- */}
-      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6 max-w-7xl mx-auto relative border-t border-black/[0.03] dark:border-white/[0.04]">
+      <RevealSection id="features" className="section-padding px-4 sm:px-6 max-w-7xl mx-auto relative border-t border-black/[0.015] dark:border-white/[0.015]">
 
         <div className="text-center mb-16 relative z-10">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/10 dark:border-indigo-400/10 mb-4">Capabilities</span>
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/5 dark:border-indigo-400/05 mb-4">Capabilities</span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
             Engineered for <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">Conversational Excellence</span>
           </h2>
@@ -348,7 +495,7 @@ export default function LandingPage() {
           {/* Card 1 */}
           <div className="glass-card interactive-card p-6 flex flex-col justify-between group">
             <div>
-              <div className="w-10 h-10 rounded-lg bg-black/[0.03] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-lg bg-black/[0.015] dark:bg-white/[0.015] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Sparkles className="w-5 h-5 text-[#0f0f15] dark:text-white" />
               </div>
               <h3 className="text-lg font-semibold text-[#0f0f15] dark:text-white mb-2">AI Agent Playground</h3>
@@ -365,7 +512,7 @@ export default function LandingPage() {
           {/* Card 2 */}
           <div className="glass-card interactive-card p-6 flex flex-col justify-between group">
             <div>
-              <div className="w-10 h-10 rounded-lg bg-black/[0.03] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-lg bg-black/[0.015] dark:bg-white/[0.015] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Code className="w-5 h-5 text-[#0f0f15] dark:text-white" />
               </div>
               <h3 className="text-lg font-semibold text-[#0f0f15] dark:text-white mb-2">One-Line Embed</h3>
@@ -382,7 +529,7 @@ export default function LandingPage() {
           {/* Card 3 */}
           <div className="glass-card interactive-card p-6 flex flex-col justify-between group">
             <div>
-              <div className="w-10 h-10 rounded-lg bg-black/[0.03] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-lg bg-black/[0.015] dark:bg-white/[0.015] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Shield className="w-5 h-5 text-[#0f0f15] dark:text-white" />
               </div>
               <h3 className="text-lg font-semibold text-[#0f0f15] dark:text-white mb-2">Multi-Tenant Vault</h3>
@@ -397,14 +544,14 @@ export default function LandingPage() {
           </div>
 
         </div>
-      </section>
+      </RevealSection>
 
       {/* ---- Interactive Walkthrough / Workflow Section ---- */}
-      <section id="workflow" className="py-16 sm:py-24 px-4 sm:px-6 border-t border-black/[0.03] dark:border-white/[0.04] bg-neutral-50/20 dark:bg-white/[0.01] relative">
+      <RevealSection id="workflow" className="section-padding px-4 sm:px-6 border-t border-black/[0.015] dark:border-white/[0.015] bg-[#fafafa]/50 dark:bg-[#06060a]/50 relative">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
           <div className="lg:col-span-5 text-left">
-            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/10 dark:border-indigo-400/10 mb-4">Simple Setup</span>
+            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/5 dark:border-indigo-400/05 mb-4">Simple Setup</span>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter mb-6 text-[#0f0f15] dark:text-white">
               Launch support in <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">three milestones</span>
             </h2>
@@ -418,12 +565,12 @@ export default function LandingPage() {
                   key={s.step}
                   onClick={() => setActiveStep(s.step)}
                   className={`p-4 rounded-xl border transition-all cursor-pointer text-left ${activeStep === s.step
-                      ? "bg-white dark:bg-[#0c0c14] border-black/[0.06] dark:border-white/[0.03] shadow-sm"
+                      ? "bg-white dark:bg-[#0c0c14] border-black/[0.02] dark:border-white/[0.02] shadow-sm"
                       : "bg-transparent border-transparent hover:bg-neutral-50 dark:hover:bg-white/[0.02]"
                     }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${activeStep === s.step ? "bg-black dark:bg-white text-white dark:text-black" : "bg-neutral-100 dark:bg-white/[0.04] text-[#5f6368] dark:text-[#94a3b8]"
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${activeStep === s.step ? "bg-black dark:bg-white text-white dark:text-black" : "bg-black/[0.015] dark:bg-white/[0.015] text-[#5f6368] dark:text-[#94a3b8]"
                       }`}>
                       {s.step}
                     </span>
@@ -442,8 +589,8 @@ export default function LandingPage() {
           </div>
 
           <div className="lg:col-span-7 w-full flex justify-center">
-            <div className="w-full max-w-lg bg-white dark:bg-[#0c0c14] border border-black/[0.06] dark:border-white/[0.03] rounded-2xl p-6 shadow-sm relative min-h-[300px] flex flex-col justify-between">
-              <div className="flex items-center justify-between border-b border-black/[0.05] dark:border-white/[0.03] pb-4 mb-4">
+            <div className="w-full max-w-lg bg-white dark:bg-[#0c0c14] border border-black/[0.02] dark:border-white/[0.02] rounded-2xl p-6 shadow-sm relative min-h-[300px] flex flex-col justify-between">
+              <div className="flex items-center justify-between border-b border-black/[0.015] dark:border-white/[0.015] pb-4 mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-red-400" />
                   <div className="w-3 h-3 rounded-full bg-yellow-400" />
@@ -468,7 +615,7 @@ export default function LandingPage() {
 
               {activeStep === 2 && (
                 <div className="flex-1 flex flex-col justify-center animate-fade-in space-y-3">
-                  <div className="bg-[#f9fafb] dark:bg-[#08080d] p-3 rounded border border-black/[0.04] dark:border-white/[0.03] font-mono text-xs text-[#0f0f15] dark:text-white">
+                  <div className="bg-[#fafafa] dark:bg-[#09090f] p-3 rounded border border-black/[0.015] dark:border-white/[0.015] font-mono text-xs text-[#0f0f15] dark:text-white">
                     $ pbcopy &lt; script_embed.txt
                   </div>
                   <p className="text-xs text-[#5f6368] dark:text-[#94a3b8]">
@@ -479,7 +626,7 @@ export default function LandingPage() {
 
               {activeStep === 3 && (
                 <div className="flex-1 flex flex-col justify-center animate-fade-in text-center py-6 space-y-4">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-100 dark:bg-white/[0.04] text-[#0f0f15] dark:text-white border border-black/[0.05] dark:border-white/[0.03] md:mx-auto">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/[0.015] dark:bg-white/[0.015] text-[#0f0f15] dark:text-white border border-black/[0.015] dark:border-white/[0.015] md:mx-auto">
                     <Zap className="w-3.5 h-3.5 text-black dark:text-white animate-pulse" />
                     Sandbox Active
                   </div>
@@ -489,7 +636,7 @@ export default function LandingPage() {
                 </div>
               )}
 
-              <div className="border-t border-black/[0.05] dark:border-white/[0.03] pt-4 mt-4 flex items-center justify-between text-[11px] text-[#94a3b8]">
+              <div className="border-t border-black/[0.015] dark:border-white/[0.015] pt-4 mt-4 flex items-center justify-between text-[11px] text-[#94a3b8]">
                 <span>Status: Fully Configured</span>
                 <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -500,12 +647,14 @@ export default function LandingPage() {
           </div>
 
         </div>
-      </section>
+      </RevealSection>
 
       {/* ---- Subscription / Pricing Section ---- */}
-      <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-6 border-t border-black/[0.03] dark:border-white/[0.04] max-w-7xl mx-auto relative">
+      <RevealSection id="pricing" className="section-padding px-4 sm:px-6 border-t border-black/[0.015] dark:border-white/[0.015] max-w-7xl mx-auto relative">
+        <div className="pricing-gradient" />
+        
         <div className="text-center mb-16 relative z-10">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/10 dark:border-indigo-400/10 mb-4">Subscription</span>
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/5 dark:border-indigo-400/05 mb-4">Subscription</span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
             Simple, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">Transparent Plans</span>
           </h2>
@@ -515,10 +664,10 @@ export default function LandingPage() {
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch pt-4 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-4 relative z-10">
           
           {/* Free Plan */}
-          <div className="glass-card p-6 sm:p-8 flex flex-col justify-between border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] relative rounded-2xl">
+          <div className="glass-card p-8 sm:p-10 flex flex-col justify-between border border-black/[0.015] dark:border-white/[0.015] bg-[#fafafa] dark:bg-[#09090f] relative rounded-2xl">
             <div>
               <h3 className="text-lg font-bold text-[#0f0f15] dark:text-white mb-2">Free Plan</h3>
               <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] leading-relaxed mb-6">
@@ -528,7 +677,7 @@ export default function LandingPage() {
                 <span className="text-3xl sm:text-4xl font-extrabold text-[#0f0f15] dark:text-white">₹0</span>
                 <span className="text-xs text-[#5f6368] dark:text-[#94a3b8]">/month</span>
               </div>
-              <ul className="space-y-3.5">
+              <ul className="space-y-4">
                 {[
                   "1 AI chatbot",
                   "1 website deployment",
@@ -542,10 +691,10 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <div className="mt-8">
+            <div className="mt-10">
               <Link
                 href="/login"
-                className="btn-secondary !w-full text-center block text-xs font-semibold py-2.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] hover:bg-neutral-50 dark:hover:bg-white/[0.02]"
+                className="btn-secondary !w-full text-center block text-xs font-semibold py-2.5 rounded-lg border border-black/[0.015] dark:border-white/[0.015]"
               >
                 Get Started Free
               </Link>
@@ -553,7 +702,7 @@ export default function LandingPage() {
           </div>
 
           {/* Starter Plan */}
-          <div className="glass-card p-6 sm:p-8 flex flex-col justify-between border border-black/[0.05] dark:border-white/[0.06] bg-white dark:bg-[#0c0c14] relative rounded-2xl">
+          <div className="glass-card p-8 sm:p-10 flex flex-col justify-between border border-black/[0.015] dark:border-white/[0.015] bg-[#fafafa] dark:bg-[#09090f] relative rounded-2xl">
             <div>
               <h3 className="text-lg font-bold text-[#0f0f15] dark:text-white mb-2">Starter Plan</h3>
               <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] leading-relaxed mb-6">
@@ -563,7 +712,7 @@ export default function LandingPage() {
                 <span className="text-3xl sm:text-4xl font-extrabold text-[#0f0f15] dark:text-white">₹799</span>
                 <span className="text-xs text-[#5f6368] dark:text-[#94a3b8]">/month</span>
               </div>
-              <ul className="space-y-3.5">
+              <ul className="space-y-4">
                 {[
                   "3 AI chatbots",
                   "3 website deployments",
@@ -578,23 +727,23 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <div className="mt-8">
+            <div className="mt-10">
               <Link
                 href="/login"
-                className="btn-secondary !w-full text-center block text-xs font-semibold py-2.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] hover:bg-neutral-50 dark:hover:bg-white/[0.02]"
+                className="btn-secondary !w-full text-center block text-xs font-semibold py-2.5 rounded-lg border border-black/[0.015] dark:border-white/[0.015]"
               >
                 Choose Starter
               </Link>
             </div>
           </div>
 
-          {/* Pro Plan */}
-          <div className="glass-card p-6 sm:p-8 flex flex-col justify-between border border-[#6366f1] shadow-[0_0_24px_rgba(99,102,241,0.06)] dark:shadow-[0_0_32px_rgba(99,102,241,0.08)] bg-white dark:bg-[#0c0c16]/90 lg:scale-[1.03] z-10 relative rounded-2xl">
+          {/* Pro Plan (Larger and Raised) */}
+          <div className="glass-card p-8 sm:p-10 flex flex-col justify-between border border-[#6366f1]/25 shadow-[0_25px_50px_-12px_rgba(99,102,241,0.12)] bg-[#fafafa] dark:bg-[#0c0c16]/95 lg:scale-[1.08] lg:-translate-y-3 z-20 relative rounded-2xl">
             {/* Glow Accent */}
-            <div className="absolute top-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-[#6366f1] to-transparent" />
+            <div className="absolute top-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-[#6366f1]/40 to-transparent" />
             
             {/* Popular Badge */}
-            <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#6366f1]/20 bg-[#6366f1]/5 text-[#6366f1] text-[10px] font-bold uppercase tracking-wider">
+            <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#6366f1]/15 bg-[#6366f1]/5 text-[#6366f1] text-[10px] font-bold uppercase tracking-wider">
               <Sparkles className="w-3 h-3" />
               Most Popular
             </div>
@@ -608,7 +757,7 @@ export default function LandingPage() {
                 <span className="text-3xl sm:text-4xl font-extrabold text-[#0f0f15] dark:text-white">₹2499</span>
                 <span className="text-xs text-[#5f6368] dark:text-[#94a3b8]">/month</span>
               </div>
-              <ul className="space-y-3.5">
+              <ul className="space-y-4">
                 {[
                   "10 AI chatbots",
                   "10 website deployments",
@@ -624,7 +773,7 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <div className="mt-8">
+            <div className="mt-10">
               <Link
                 href="/login"
                 className="btn-primary !w-full text-center block text-xs font-semibold py-2.5 rounded-lg"
@@ -635,12 +784,12 @@ export default function LandingPage() {
           </div>
 
         </div>
-      </section>
+      </RevealSection>
 
       {/* ---- Testimonials Marquee Section ---- */}
-      <section id="testimonials" className="py-16 sm:py-24 border-t border-black/[0.03] dark:border-white/[0.04] overflow-hidden relative">
+      <RevealSection id="testimonials" className="section-padding border-t border-black/[0.015] dark:border-white/[0.015] overflow-hidden relative">
         <div className="text-center mb-10 sm:mb-14 px-4 sm:px-6">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/10 dark:border-indigo-400/10 mb-4">Testimonials</span>
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 bg-indigo-500/5 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full border border-indigo-500/5 dark:border-indigo-400/05 mb-4">Testimonials</span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
             Loved by <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">teams everywhere</span>
           </h2>
@@ -715,17 +864,17 @@ export default function LandingPage() {
         {/* Edge fades */}
         <div className="absolute inset-y-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-white dark:from-[#030307] to-transparent pointer-events-none z-10" />
         <div className="absolute inset-y-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-white dark:from-[#030307] to-transparent pointer-events-none z-10" />
-      </section>
+      </RevealSection>
 
       {/* ---- Interactive Call to Action Banner ---- */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
+      <RevealSection className="section-padding px-4 sm:px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="relative p-6 sm:p-12 rounded-2xl sm:rounded-3xl overflow-hidden border border-indigo-500/20 dark:border-indigo-400/10">
+          <div className="relative p-6 sm:p-12 rounded-2xl sm:rounded-3xl overflow-hidden border border-indigo-500/10 dark:border-indigo-400/05">
             {/* Gradient background */}
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10 pointer-events-none" />
             {/* Animated glow orbs */}
-            <div className="absolute -top-20 -right-20 w-60 h-60 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none animate-float" />
-            <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-purple-500/10 rounded-full blur-[80px] pointer-events-none animate-float" style={{ animationDelay: '3s' }} />
+            <div className="absolute -top-20 -right-20 w-60 h-60 bg-indigo-500/[0.04] rounded-full blur-[80px] pointer-events-none animate-float" />
+            <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-purple-500/[0.04] rounded-full blur-[80px] pointer-events-none animate-float" style={{ animationDelay: '3s' }} />
 
             <div className="relative z-10 max-w-xl mx-auto">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter mb-4 text-[#0f0f15] dark:text-white">
@@ -746,10 +895,10 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </RevealSection>
 
       {/* ---- Footer ---- */}
-      <footer className="py-10 sm:py-16 px-4 sm:px-6 border-t border-black/[0.04] dark:border-white/[0.04] text-xs text-[#94a3b8]">
+      <footer className="py-16 px-4 sm:px-6 border-t border-black/[0.015] dark:border-white/[0.015] text-xs text-[#94a3b8]">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-10 mb-10 sm:mb-12">
             {/* Brand */}
@@ -801,16 +950,16 @@ export default function LandingPage() {
           </div>
 
           {/* Bottom bar */}
-          <div className="border-t border-black/[0.04] dark:border-white/[0.04] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="border-t border-black/[0.015] dark:border-white/[0.015] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[11px] text-[#94a3b8]">© {new Date().getFullYear()} EchoDesk. All rights reserved.</p>
             <div className="flex items-center gap-4">
-              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.06] dark:border-white/[0.06] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-indigo-500/30 transition-all" aria-label="Twitter">
+              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-indigo-500/30 transition-all" aria-label="Twitter">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
-              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.06] dark:border-white/[0.06] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-indigo-500/30 transition-all" aria-label="GitHub">
+              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-indigo-500/30 transition-all" aria-label="GitHub">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
               </a>
-              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.06] dark:border-white/[0.06] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-indigo-500/30 transition-all" aria-label="LinkedIn">
+              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-indigo-500/30 transition-all" aria-label="LinkedIn">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
               </a>
             </div>
