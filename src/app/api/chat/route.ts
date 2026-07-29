@@ -270,7 +270,7 @@ Instructions:
 - If the user asks something not covered in the knowledge base, politely say you don't have that information and suggest contacting ${settings.email} for further assistance.
 - Do NOT make up information that is not in the knowledge base.
 - Keep responses under 300 words unless the user asks for detailed information.
-- Use markdown formatting when helpful (bold, lists, etc).`;
+- ALWAYS format lists, numbered items, doctor details, and pricing items with explicit newlines (\n) so each item or field (e.g. Name, Specialty, Email, Phone) appears on its own separate line. Never run multiple list items together on a single line.`;
 
     // Build conversation history for Gemini
     const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
