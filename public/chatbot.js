@@ -241,6 +241,7 @@
         font-size: 13px;
         line-height: 1.5;
         word-wrap: break-word;
+        white-space: pre-wrap;
         animation: echodesk-msgIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
 
