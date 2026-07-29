@@ -4,6 +4,26 @@ EchoDesk is a modern, production-grade B2B SaaS platform that enables businesses
 
 ---
 
+## 🌟 Real-World Showcase & Integrations
+
+EchoDesk powers live 24/7 AI customer support widgets across web applications:
+
+### 🦷 [Toothly — AI Dental Care Platform](https://toothly-ai.vercel.app)
+* **Description**: Toothly is a production AI-powered dental care and appointment booking platform.
+* **EchoDesk Integration**: Uses EchoDesk to provide 24/7 patient support, dentist information, treatment pricing guidance, subscription plan queries, and after-hours emergency pain triage.
+* **Embed Code in Toothly**:
+  ```tsx
+  import Script from "next/script";
+
+  <Script
+    src="https://echodesk-platform.vercel.app/chatbot.js"
+    data-org-id="6a4d06d39ecc5781309cd5fd"
+    strategy="afterInteractive"
+  />
+  ```
+
+---
+
 ## 🚀 Key Features
 
 *   **Multi-Tenant Knowledge Engine**: 
