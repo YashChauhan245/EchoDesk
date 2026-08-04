@@ -42,4 +42,5 @@ next-env.d.ts
 
 # interview guide
 INTERVIEW.md
-
+INTERVIEW.pdf
+*.pdf
