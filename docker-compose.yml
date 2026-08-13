@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # 1. EchoDesk Next.js Web Application Container
+  echodesk-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: echodesk-app
+    restart: always
+    ports:
+      - "3001:3000" # Map host port 3001 to container port 3000
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://echodesk-mongo:27017/echodesk
+      - NEXT_PUBLIC_APP_URL=http://localhost:3001
+    depends_on:
+      - echodesk-mongo
+    networks:
+      - echodesk-network
+
+  # 2. Local MongoDB Database Container
+  echodesk-mongo:
+    image: mongo:7.0
+    container_name: echodesk-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - echodesk-network
+
+# Custom Bridge Network for Inter-Container DNS Resolution
+networks:
+  echodesk-network:
+    driver: bridge
+
+# Named Volume for Preserving MongoDB Database State
+volumes:
+  mongo-data:
+    driver: local

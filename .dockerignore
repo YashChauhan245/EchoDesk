@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+build
+dist
+.env
+.env*.local
+.git
+.gitignore
+.venv
+INTERVIEW.pdf
+README.md

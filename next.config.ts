@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   // Enable CORS headers for public endpoints used by the embeddable chatbot
   async headers() {
     return [
