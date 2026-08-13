@@ -628,7 +628,7 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
                       type="button"
                       disabled={!selectedFile || importing}
                       onClick={handleFileImport}
-                      className="px-3 py-1.5 rounded-lg bg-[#6366f1] text-white text-xs font-semibold hover:bg-[#5356e3] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
                     >
                       {importing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                       {importing ? "Parsing..." : "Import Text"}
@@ -651,7 +651,7 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
                     type="button"
                     disabled={!scrapeUrl.trim() || importing}
                     onClick={handleUrlScrape}
-                    className="px-4 py-2.5 rounded-xl bg-[#6366f1] text-white text-xs font-semibold hover:bg-[#5356e3] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer flex-shrink-0"
+                    className="px-4 py-2.5 rounded-xl bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer flex-shrink-0"
                   >
                     {importing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     {importing ? "Scraping..." : "Scrape Link"}
@@ -692,11 +692,11 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
                   {/* Color presets */}
                   <div className="flex flex-wrap gap-2 ml-2">
                     {[
-                      "#6366f1",
-                      "#8b5cf6",
+                      "#f59e0b",
+                      "#d97706",
                       "#06b6d4",
                       "#10b981",
-                      "#f59e0b",
+                      "#3b82f6",
                       "#ef4444",
                       "#ec4899",
                     ].map((color) => (

@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
           businessName: businessName.trim(),
           email: email.trim(),
           knowledgeBase: knowledgeBase.trim(),
-          widgetColor: widgetColor || '#6366f1',
+          widgetColor: widgetColor || '#f59e0b',
           welcomeMessage: welcomeMessage || 'Hi there! 👋 How can I help you today?',
         },
         { new: true, runValidators: true }

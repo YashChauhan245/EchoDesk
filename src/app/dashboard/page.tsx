@@ -182,7 +182,7 @@ export default async function DashboardPage() {
                 </div>
                 <div className="h-1.5 w-full bg-neutral-100 dark:bg-white/[0.04] rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-[#6366f1] to-indigo-500 rounded-full transition-all duration-1000 ease-out"
+                    className="h-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-full transition-all duration-1000 ease-out"
                     style={{ width: `${Math.min(100, (subscription.usage.messagesUsed / subscription.limits.maxMessages) * 100)}%` }}
                   />
                 </div>
@@ -209,7 +209,7 @@ export default async function DashboardPage() {
           <div className="mt-5 pt-3 border-t border-black/[0.015] dark:border-white/[0.015] flex items-center justify-between">
             <Link 
               href="/dashboard/pricing" 
-              className="text-[10px] font-bold text-[#6366f1] dark:text-indigo-400 hover:underline flex items-center gap-0.5"
+              className="text-[10px] font-bold text-amber-500 dark:text-amber-400 hover:underline flex items-center gap-0.5"
             >
               Plans & Billing
               <ChevronRight className="w-3 h-3" />

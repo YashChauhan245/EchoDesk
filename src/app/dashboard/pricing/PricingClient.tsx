@@ -225,7 +225,7 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
               key={plan.id}
               className={`glass-card p-8 flex flex-col justify-between border relative overflow-hidden transition-all duration-300 ${
                 plan.popular
-                  ? "border-[#6366f1]/25 shadow-[0_25px_50px_-12px_rgba(99,102,241,0.12)] bg-[#fafafa] dark:bg-[#0c0c16]/95 lg:scale-[1.05] lg:-translate-y-2 z-10"
+                  ? "border-[#f59e0b]/25 shadow-[0_25px_50px_-12px_rgba(245,158,11,0.12)] bg-[#fafafa] dark:bg-[#0c0c16]/95 lg:scale-[1.05] lg:-translate-y-2 z-10"
                   : isCurrent
                     ? "border-[#10b981]/30 bg-[#fafafa] dark:bg-[#09090f]"
                     : "border-black/[0.015] dark:border-white/[0.015] bg-[#fafafa] dark:bg-[#09090f]"
@@ -233,7 +233,7 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
             >
               {/* Glow Accent for Popular */}
               {plan.popular && (
-                <div className="absolute top-0 right-0 left-0 h-[2px] bg-[#6366f1]/20" />
+                <div className="absolute top-0 right-0 left-0 h-[2px] bg-[#f59e0b]/20" />
               )}
 
               {/* Active Plan Badge */}
@@ -245,7 +245,7 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
 
               {/* Popular Badge */}
               {plan.popular && (
-                <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#6366f1]/15 bg-[#6366f1]/5 text-[#6366f1] text-[10px] font-bold uppercase tracking-wider">
+                <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#f59e0b]/15 bg-[#f59e0b]/5 text-[#f59e0b] text-[10px] font-bold uppercase tracking-wider">
                   <Sparkles className="w-3 h-3" />
                   Most Popular
                 </div>

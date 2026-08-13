@@ -51,7 +51,7 @@ const ChatbotSettingsSchema = new Schema<IChatbotSettingsDocument>(
     },
     widgetColor: {
       type: String,
-      default: '#6366f1', // Indigo-500 — a modern, premium default
+      default: '#f59e0b', // Warm Amber Copper — premium dark luxury default
       trim: true,
     },
     welcomeMessage: {
