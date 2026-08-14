@@ -49,7 +49,7 @@
   var isOpen = false;
   var messages = [];
   var sessionId = localStorage.getItem("echodesk_session_" + ORG_ID) || "";
-  var widgetColor = "#f59e0b";
+  var widgetColor = "#8f8afc";
   var businessName = "Support";
   var welcomeMessage = "Hi there! 👋 How can I help you today?";
   var isLoading = false;

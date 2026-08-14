@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import Counter from "@/components/Counter";
-import { Menu, X } from "lucide-react";
 import {
+  Menu,
+  X,
   ArrowRight,
   Bot,
   Code,
@@ -16,13 +17,10 @@ import {
   Copy,
   ChevronRight,
   Terminal,
-  Settings,
   Zap,
-  Globe,
   Users,
-  BarChart3,
   Clock,
-  Star
+  Star,
 } from "lucide-react";
 
 interface Message {
@@ -103,7 +101,7 @@ export default function LandingPage() {
     let typewriterTimeout: NodeJS.Timeout;
 
     const isUser = nextMsg.sender === "user";
-    const typingDuration = isUser ? 100 : 900; // 900ms fits the 700-1200ms window perfectly
+    const typingDuration = isUser ? 100 : 900;
 
     // 1. Show typing indicator (skip for user messages)
     const typingTimeout = setTimeout(() => {
@@ -164,13 +162,14 @@ export default function LandingPage() {
     };
   }, [currentStep]);
 
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#030307] text-[#0f0f15] dark:text-[#f8fafc] selection:bg-black/5 overflow-x-hidden transition-colors duration-300 relative">
       {/* Background Noise Texture */}
       <div className="noise-overlay" />
       
       {/* Subtle background blurred lights */}
-      <div className="absolute top-[12%] left-[-10%] w-[450px] sm:w-[600px] h-[450px] sm:h-[600px] rounded-full bg-amber-500/[0.012] dark:bg-amber-500/[0.006] blur-[120px] pointer-events-none" />
+      <div className="absolute top-[12%] left-[-10%] w-[450px] sm:w-[600px] h-[450px] sm:h-[600px] rounded-full bg-[#8f8afc]/[0.012] dark:bg-[#8f8afc]/[0.006] blur-[120px] pointer-events-none" />
       <div className="absolute top-[42%] right-[-10%] w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] rounded-full bg-purple-500/[0.012] dark:bg-purple-500/[0.006] blur-[140px] pointer-events-none" />
       <div className="absolute top-[78%] left-[-5%] w-[450px] sm:w-[600px] h-[450px] sm:h-[600px] rounded-full bg-emerald-500/[0.01] dark:bg-emerald-500/[0.005] blur-[120px] pointer-events-none" />
 
@@ -245,17 +244,17 @@ export default function LandingPage() {
         <div className="hero-gradient" />
         
         <section className="relative pt-24 sm:pt-32 pb-20 sm:pb-28 px-4 sm:px-6 max-w-7xl mx-auto z-10">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[800px] h-[200px] sm:h-[350px] bg-amber-500/[0.015] dark:bg-amber-500/[0.02] rounded-full blur-[140px] pointer-events-none" />
-          <div className="absolute top-[45%] right-10 w-[150px] sm:w-[300px] h-[150px] sm:h-[300px] bg-orange-500/[0.01] dark:bg-orange-500/[0.015] rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[800px] h-[200px] sm:h-[350px] bg-[#8f8afc]/[0.015] dark:bg-[#8f8afc]/[0.02] rounded-full blur-[140px] pointer-events-none" />
+          <div className="absolute top-[45%] right-10 w-[150px] sm:w-[300px] h-[150px] sm:h-[300px] bg-[#6c67f5]/[0.01] dark:bg-[#6c67f5]/[0.015] rounded-full blur-[100px] pointer-events-none" />
 
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
             {/* Hero Left Content */}
             <div className="lg:col-span-7 flex flex-col items-start text-left">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-amber-500/20 dark:border-amber-400/20 bg-amber-500/5 dark:bg-amber-400/10 mb-6 shadow-sm backdrop-blur-md">
-                <span className="inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                <span className="text-[11px] text-amber-600 dark:text-amber-300 font-bold tracking-wider uppercase">
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#8f8afc]/20 dark:border-[#a5a1fd]/20 bg-[#8f8afc]/5 dark:bg-[#a5a1fd]/10 mb-6 shadow-sm backdrop-blur-md">
+                <span className="inline-flex rounded-full h-2 w-2 bg-[#8f8afc]"></span>
+                <span className="text-[11px] text-[#7874e0] dark:text-[#bbb8fe] font-bold tracking-wider uppercase">
                   Autonomous Support Infrastructure
                 </span>
               </div>
@@ -263,7 +262,7 @@ export default function LandingPage() {
               {/* Title */}
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] mb-6 text-[#0f0f15] dark:text-white">
                 Instant customer support,
-                <span className="block mt-2 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 bg-clip-text text-transparent font-black tracking-tight drop-shadow-sm">automated by AI.</span>
+                <span className="block mt-2 bg-gradient-to-r from-[#a5a1fd] via-[#8f8afc] to-[#6c67f5] bg-clip-text text-transparent font-black tracking-tight drop-shadow-sm">automated by AI.</span>
               </h1>
 
               {/* Description */}
@@ -403,7 +402,7 @@ export default function LandingPage() {
             { icon: <Star className="w-5 h-5" />, value: "4.9/5", label: "Customer rating" },
           ].map((stat) => (
             <div key={stat.label} className="glass-card p-6 text-center group">
-              <div className="w-10 h-10 rounded-xl bg-black/[0.015] dark:bg-white/[0.015] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-amber-500 dark:text-amber-400 mx-auto mb-3 group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-xl bg-black/[0.015] dark:bg-white/[0.015] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-[#8f8afc] dark:text-[#a5a1fd] mx-auto mb-3 group-hover:scale-110 transition-transform">
                 {stat.icon}
               </div>
               <p className="text-2xl sm:text-3xl font-extrabold text-[#0f0f15] dark:text-white tracking-tight">
@@ -419,9 +418,9 @@ export default function LandingPage() {
       <RevealSection id="features" className="section-padding px-4 sm:px-6 max-w-7xl mx-auto relative border-t border-black/[0.015] dark:border-white/[0.015]">
 
         <div className="text-center mb-16 relative z-10">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400 bg-amber-500/5 dark:bg-amber-400/10 px-4 py-1.5 rounded-full border border-amber-500/5 dark:border-amber-400/05 mb-4">Capabilities</span>
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#8f8afc] dark:text-[#a5a1fd] bg-[#8f8afc]/5 dark:bg-[#a5a1fd]/10 px-4 py-1.5 rounded-full border border-[#8f8afc]/5 dark:border-[#a5a1fd]/05 mb-4">Capabilities</span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
-            Engineered for <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">Conversational Excellence</span>
+            Engineered for <span className="bg-gradient-to-r from-[#8f8afc] to-[#6c67f5] bg-clip-text text-transparent">Conversational Excellence</span>
           </h2>
           <p className="text-[#5f6368] dark:text-[#94a3b8] mt-3 max-w-xl mx-auto text-sm sm:text-base">
             EchoDesk combines cutting-edge LLMs with developer simplicity. Set up in minutes, scale to thousands.
@@ -489,9 +488,9 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
           <div className="lg:col-span-5 text-left">
-            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400 bg-amber-500/5 dark:bg-amber-400/10 px-4 py-1.5 rounded-full border border-amber-500/5 dark:border-amber-400/05 mb-4">Simple Setup</span>
+            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#8f8afc] dark:text-[#a5a1fd] bg-[#8f8afc]/5 dark:bg-[#a5a1fd]/10 px-4 py-1.5 rounded-full border border-[#8f8afc]/5 dark:border-[#a5a1fd]/05 mb-4">Simple Setup</span>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter mb-6 text-[#0f0f15] dark:text-white">
-              Launch support in <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">three milestones</span>
+              Launch support in <span className="bg-gradient-to-r from-[#8f8afc] to-[#6c67f5] bg-clip-text text-transparent">three milestones</span>
             </h2>
             <div className="flex flex-col gap-4">
               {[
@@ -592,9 +591,9 @@ export default function LandingPage() {
         <div className="pricing-gradient" />
         
         <div className="text-center mb-16 relative z-10">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400 bg-amber-500/5 dark:bg-amber-400/10 px-4 py-1.5 rounded-full border border-amber-500/5 dark:border-amber-400/05 mb-4">Subscription</span>
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#8f8afc] dark:text-[#a5a1fd] bg-[#8f8afc]/5 dark:bg-[#a5a1fd]/10 px-4 py-1.5 rounded-full border border-[#8f8afc]/5 dark:border-[#a5a1fd]/05 mb-4">Subscription</span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
-            Simple, <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">Transparent Plans</span>
+            Simple, <span className="bg-gradient-to-r from-[#8f8afc] to-[#6c67f5] bg-clip-text text-transparent">Transparent Plans</span>
           </h2>
           <p className="text-[#5f6368] dark:text-[#94a3b8] mt-3 max-w-xl mx-auto text-sm sm:text-base">
             Scale your automated support workspace seamlessly. Choose the plan that fits your customer interaction volume.
@@ -676,12 +675,12 @@ export default function LandingPage() {
           </div>
 
           {/* Pro Plan (Larger and Raised) */}
-          <div className="glass-card p-8 sm:p-10 flex flex-col justify-between border border-[#f59e0b]/25 shadow-[0_25px_50px_-12px_rgba(245,158,11,0.12)] bg-[#fafafa] dark:bg-[#0c0c16]/95 lg:scale-[1.08] lg:-translate-y-3 z-20 relative rounded-2xl">
+          <div className="glass-card p-8 sm:p-10 flex flex-col justify-between border border-[#8f8afc]/25 shadow-[0_25px_50px_-12px_rgba(143,138,252,0.12)] bg-[#fafafa] dark:bg-[#0c0c16]/95 lg:scale-[1.08] lg:-translate-y-3 z-20 relative rounded-2xl">
             {/* Glow Accent */}
-            <div className="absolute top-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-[#f59e0b]/40 to-transparent" />
+            <div className="absolute top-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-[#8f8afc]/40 to-transparent" />
             
             {/* Popular Badge */}
-            <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#f59e0b]/15 bg-[#f59e0b]/5 text-[#f59e0b] text-[10px] font-bold uppercase tracking-wider">
+            <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#8f8afc]/15 bg-[#8f8afc]/5 text-[#8f8afc] text-[10px] font-bold uppercase tracking-wider">
               <Sparkles className="w-3 h-3" />
               Most Popular
             </div>
@@ -727,9 +726,9 @@ export default function LandingPage() {
       {/* ---- Testimonials Marquee Section ---- */}
       <RevealSection id="testimonials" className="section-padding border-t border-black/[0.015] dark:border-white/[0.015] overflow-hidden relative">
         <div className="text-center mb-10 sm:mb-14 px-4 sm:px-6">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400 bg-amber-500/5 dark:bg-amber-400/10 px-4 py-1.5 rounded-full border border-amber-500/5 dark:border-amber-400/05 mb-4">Testimonials</span>
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#8f8afc] dark:text-[#a5a1fd] bg-[#8f8afc]/5 dark:bg-[#a5a1fd]/10 px-4 py-1.5 rounded-full border border-[#8f8afc]/5 dark:border-[#a5a1fd]/05 mb-4">Testimonials</span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-[#0f0f15] dark:text-white">
-            Loved by <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">teams everywhere</span>
+            Loved by <span className="bg-gradient-to-r from-[#8f8afc] to-[#6c67f5] bg-clip-text text-transparent">teams everywhere</span>
           </h2>
           <p className="text-[#5f6368] dark:text-[#94a3b8] mt-3 max-w-xl mx-auto text-sm sm:text-base">
             See what our customers are saying about EchoDesk.
@@ -748,7 +747,7 @@ export default function LandingPage() {
             <div key={`t-${i}`} className="glass-card p-6 flex flex-col justify-between">
               <div className="flex items-center gap-1 mb-3">
                 {Array.from({ length: 5 }).map((_, s) => (
-                  <svg key={s} className={`w-3.5 h-3.5 ${s < t.stars ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                  <svg key={s} className={`w-3.5 h-3.5 ${s < t.stars ? 'text-[#a5a1fd]' : 'text-gray-300 dark:text-gray-600'}`} fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
@@ -769,13 +768,13 @@ export default function LandingPage() {
       {/* ---- Interactive Call to Action Banner ---- */}
       <RevealSection className="section-padding px-4 sm:px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="relative p-6 sm:p-12 rounded-2xl sm:rounded-3xl overflow-hidden border border-amber-500/10 dark:border-amber-400/05">
+          <div className="relative p-6 sm:p-12 rounded-2xl sm:rounded-3xl overflow-hidden border border-[#8f8afc]/10 dark:border-[#a5a1fd]/05">
             {/* Gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-yellow-500/5 dark:from-amber-500/10 dark:via-orange-500/10 dark:to-yellow-500/10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#8f8afc]/5 via-[#6c67f5]/5 to-[#a78bfa]/5 dark:from-[#8f8afc]/10 dark:via-[#6c67f5]/10 dark:to-[#a78bfa]/10 pointer-events-none" />
             
             <div className="relative z-10 max-w-xl mx-auto">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter mb-4 text-[#0f0f15] dark:text-white">
-                Redefine your <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">support workspace</span>
+                Redefine your <span className="bg-gradient-to-r from-[#8f8afc] to-[#6c67f5] bg-clip-text text-transparent">support workspace</span>
               </h2>
               <p className="text-[#5f6368] dark:text-[#94a3b8] mb-8 text-sm sm:text-base leading-relaxed">
                 Unlock instant AI support with secure organizational logic. Start building your first chatbot for free.
@@ -850,13 +849,13 @@ export default function LandingPage() {
           <div className="border-t border-black/[0.015] dark:border-white/[0.015] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[11px] text-[#94a3b8]">© {new Date().getFullYear()} EchoDesk. All rights reserved.</p>
             <div className="flex items-center gap-4">
-              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-amber-500/30 transition-all" aria-label="Twitter">
+              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-[#8f8afc]/30 transition-all" aria-label="Twitter">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
-              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-amber-500/30 transition-all" aria-label="GitHub">
+              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-[#8f8afc]/30 transition-all" aria-label="GitHub">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
               </a>
-              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-amber-500/30 transition-all" aria-label="LinkedIn">
+              <a href="#" className="w-8 h-8 rounded-full border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:border-[#8f8afc]/30 transition-all" aria-label="LinkedIn">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
               </a>
             </div>

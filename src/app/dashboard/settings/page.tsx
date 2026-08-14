@@ -541,7 +541,7 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
 
             <div className="flex items-center justify-between mt-2">
               <span className="text-[10px] text-[#5f6368] dark:text-[#94a3b8]">Supports Markdown format</span>
-              <span className={`text-[10px] ${knowledgeBase.length > 45000 ? "text-amber-500 font-semibold" : "text-[#5f6368] dark:text-[#94a3b8]"}`}>
+              <span className={`text-[10px] ${knowledgeBase.length > 45000 ? "text-[#8f8afc] font-semibold" : "text-[#5f6368] dark:text-[#94a3b8]"}`}>
                 {knowledgeBase.length.toLocaleString()} / 50,000 characters
               </span>
             </div>
@@ -628,7 +628,7 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
                       type="button"
                       disabled={!selectedFile || importing}
                       onClick={handleFileImport}
-                      className="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-[#8f8afc] text-white text-xs font-semibold hover:bg-[#7874e0] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
                     >
                       {importing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                       {importing ? "Parsing..." : "Import Text"}
@@ -651,7 +651,7 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
                     type="button"
                     disabled={!scrapeUrl.trim() || importing}
                     onClick={handleUrlScrape}
-                    className="px-4 py-2.5 rounded-xl bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer flex-shrink-0"
+                    className="px-4 py-2.5 rounded-xl bg-[#8f8afc] text-white text-xs font-semibold hover:bg-[#7874e0] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer flex-shrink-0"
                   >
                     {importing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     {importing ? "Scraping..." : "Scrape Link"}
@@ -692,8 +692,8 @@ A: Yes, we support SAML and OIDC SSO powered by Scalekit.`}
                   {/* Color presets */}
                   <div className="flex flex-wrap gap-2 ml-2">
                     {[
-                      "#f59e0b",
-                      "#d97706",
+                      "#8f8afc",
+                      "#6c67f5",
                       "#06b6d4",
                       "#10b981",
                       "#3b82f6",

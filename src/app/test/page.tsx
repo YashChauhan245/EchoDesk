@@ -99,7 +99,7 @@ function TestStorefrontContent() {
             </p>
           </div>
 
-          <div className="bg-[#fffbeb] dark:bg-amber-950/20 border-l-4 border-amber-500 rounded-xl p-6 shadow-sm">
+          <div className="bg-[#f0efff] dark:bg-[#8f8afc]/10 border-l-4 border-[#8f8afc] rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-bold text-[#1a1a1a] dark:text-[#f8fafc] mb-2">
               💬 Need Help?
             </h3>

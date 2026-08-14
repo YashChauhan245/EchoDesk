@@ -61,7 +61,7 @@ export default function EmbedCodeClient({
   return (
     <div className="animate-fade-in space-y-8 max-w-4xl relative">
       {/* Soft header radial glow backdrop */}
-      <div className="absolute top-0 left-0 right-0 h-[220px] bg-gradient-to-b from-amber-500/[0.02] dark:from-amber-500/[0.04] to-transparent pointer-events-none -z-10 blur-xl" />
+      <div className="absolute top-0 left-0 right-0 h-[220px] bg-gradient-to-b from-[#8f8afc]/[0.02] dark:from-[#8f8afc]/[0.04] to-transparent pointer-events-none -z-10 blur-xl" />
 
       {/* Header */}
       <div>
@@ -77,7 +77,7 @@ export default function EmbedCodeClient({
       {chatbots.length > 1 && (
         <div className="glass-card p-6 sm:p-7 shadow-sm max-w-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Bot className="w-5 h-5 text-amber-500" />
+            <Bot className="w-5 h-5 text-[#8f8afc]" />
             <div>
               <label className="block text-xs font-semibold text-[#0f0f15] dark:text-white mb-0.5">
                 Select Chatbot Widget
@@ -115,7 +115,7 @@ export default function EmbedCodeClient({
       )}
 
       {chatbots.length === 0 && (
-        <div className="p-4 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-xl text-xs max-w-3xl flex items-center gap-3">
+        <div className="p-4 bg-[#8f8afc]/10 border border-[#8f8afc]/20 text-[#8f8afc] rounded-xl text-xs max-w-3xl flex items-center gap-3">
           <Info className="w-4 h-4 flex-shrink-0" />
           <span>You haven't configured any chatbots yet. Go to settings to create one first, or copy the legacy script below.</span>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, Info, Bot } from "lucide-react";
+import { Info, Bot } from "lucide-react";
 
 interface ChatbotOption {
   _id: string;

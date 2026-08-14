@@ -51,7 +51,7 @@ const ChatbotSettingsSchema = new Schema<IChatbotSettingsDocument>(
     },
     widgetColor: {
       type: String,
-      default: '#f59e0b', // Warm Amber Copper — premium dark luxury default
+      default: '#8f8afc', // Silver Frost Lavender — premium modern default
       trim: true,
     },
     welcomeMessage: {

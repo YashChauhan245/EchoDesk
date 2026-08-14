@@ -41,7 +41,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#030307] text-[#0f0f15] dark:text-[#f8fafc] grid-bg selection:bg-black/5 overflow-hidden transition-colors duration-300 relative px-4">
       {/* Decorative linear glow */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 opacity-60" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8f8afc] via-[#6c67f5] to-[#a78bfa] opacity-60" />
 
       {/* Back button to homepage */}
       <Link
@@ -115,7 +115,7 @@ export default function LoginPage() {
             href="/api/auth/login"
             className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white hover:bg-neutral-50 dark:bg-white/[0.02] dark:hover:bg-white/[0.06] border border-black/[0.08] dark:border-white/[0.08] rounded-xl text-xs font-semibold text-[#0f0f15] dark:text-white transition-all shadow-sm active:translate-y-0.5 hover:-translate-y-0.5 cursor-pointer"
           >
-            <Fingerprint className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+            <Fingerprint className="w-4 h-4 text-[#8f8afc] dark:text-[#a5a1fd]" />
             Continue with Passkey
           </a>
         </div>
@@ -174,7 +174,7 @@ export default function LoginPage() {
             Don't have an account?{" "}
             <a
               href="/api/auth/login"
-              className="text-amber-500 hover:text-amber-600 font-semibold"
+              className="text-[#8f8afc] hover:text-[#7874e0] font-semibold"
             >
               Sign Up
             </a>
