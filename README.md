@@ -32,6 +32,7 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 *   **Google Gemini AI Core**: Trained context-aware chatbots powered by `@google/genai` (Google Gemini models) for fast, conversational support answers.
 *   **One-Line Embeddable Chatbot**: Public JavaScript widget ([chatbot.js](file:///c:/Users/Yash/Desktop/echodesk/public/chatbot.js)) that can be dropped into any website's HTML `<body>` to load a floating chat bubble.
 *   **Sandbox Workspace & Live Preview**: A built-in chat playground panel for developers to test chatbot configurations and preview layout variations before publishing.
+*   **Live Inbox & Conversation Viewer**: Full paginated inbox dashboard (`/dashboard/inbox`) where admins can browse all visitor chat sessions, read complete message threads, search by session or content, filter flagged (low-confidence) bot responses with amber highlights, and export any conversation as CSV, JSON, or print-ready PDF.
 *   **Enterprise Authentication (SSO & Passkeys)**: Fully secure user login, Google SSO, and passwordless WebAuthn/Passkey registration powered by the **Scalekit Node SDK**.
 *   **Tiered Subscription & Billing**: Multi-tier pricing structures (Free, Starter, Pro) with subscription creation, checkout flows, signature verification, and webhook event handlers integrated with **Razorpay**.
 *   **Premium Dark/Light UI**: Responsive layout featuring advanced glassmorphic card overlays, custom animations (float, shimmer, marquee rows), and native **Tailwind CSS v4** styling.
@@ -58,8 +59,8 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 │   └── logo.png            # Main platform branding logo
 ├── src/
 │   ├── app/                # Next.js App Router
-│   │   ├── api/            # API Route Handlers (Auth, Chat, Razorpay, Scrape, Settings, Widget)
-│   │   ├── dashboard/      # Protected user workspace panels (Settings, Embed, Preview, Billing)
+│   │   ├── api/            # API Route Handlers (Auth, Chat, Conversations, Razorpay, Scrape, Settings, Widget)
+│   │   ├── dashboard/      # Protected user workspace panels (Settings, Embed, Preview, Inbox, Billing)
 │   │   ├── login/          # Custom theme-responsive login screen
 │   │   ├── test/           # Sandbox storefront demo route for widget testing
 │   │   ├── layout.tsx      # Root layout (loads Plus Jakarta Sans display fonts)
@@ -79,6 +80,7 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 *   [src/app/dashboard/settings/page.tsx](file:///c:/Users/Yash/Desktop/echodesk/src/app/dashboard/settings/page.tsx): Panel for training knowledge bases (crawling URLs, uploading PDFs) and customizing widget properties.
 *   [src/app/dashboard/preview/page.tsx](file:///c:/Users/Yash/Desktop/echodesk/src/app/dashboard/preview/page.tsx): Direct playground testing panel displaying the chatbot interface exactly how end-users experience it.
 *   [src/app/dashboard/embed/page.tsx](file:///c:/Users/Yash/Desktop/echodesk/src/app/dashboard/embed/page.tsx): Code generation module providing copy-paste integration scripts.
+*   [src/app/dashboard/inbox/page.tsx](file:///c:/Users/Yash/Desktop/echodesk/src/app/dashboard/inbox/page.tsx): Live Inbox — two-panel conversation viewer with search, pagination, flagged filter, and CSV/JSON/PDF export.
 *   [src/app/dashboard/pricing/page.tsx](file:///c:/Users/Yash/Desktop/echodesk/src/app/dashboard/pricing/page.tsx): Manage active levels (Free, Starter, Pro) with complete Razorpay integration.
 *   [src/app/test/page.tsx](file:///c:/Users/Yash/Desktop/echodesk/src/app/test/page.tsx): Simulated storefront web page designed to debug the widget script and bubble responsiveness.
 *   [src/middleware.ts](file:///c:/Users/Yash/Desktop/echodesk/src/middleware.ts): Edge middleware restricting non-public access to `/dashboard/*` when no active session cookie is present.
@@ -104,6 +106,14 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
     *   Submit a user message. Uses Google Gemini API to return context-informed answers based on organization training data.
 *   **GET** `/api/widget`
     *   Retrieve public chatbot details (custom theme, names, welcome greeting) to load in the embeddable script.
+
+### 📬 Live Inbox & Conversations
+*   **GET** `/api/conversations`
+    *   Returns a paginated list of all visitor conversation sessions for the authenticated org. Supports `page`, `limit`, `search`, and `flagged=true` query params. Each item includes a message preview, count, timestamps, and an `isFlagged` indicator when the bot triggered a low-confidence fallback response.
+*   **GET** `/api/conversations/[sessionId]`
+    *   Returns the full message thread for a single visitor session.
+*   **DELETE** `/api/conversations/[sessionId]`
+    *   Deletes a single conversation session from the database.
 
 ### 🌐 Scrapers & Data Extraction
 *   **POST** `/api/scrape/url`
