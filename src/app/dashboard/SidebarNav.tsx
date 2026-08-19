@@ -13,7 +13,8 @@ import {
   X, 
   MessageSquare,
   Bot,
-  CreditCard
+  CreditCard,
+  Inbox
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -48,6 +49,11 @@ export default function SidebarNav({ session }: SidebarNavProps) {
       href: "/dashboard/preview",
       label: "Live Preview",
       icon: Eye,
+    },
+    {
+      href: "/dashboard/inbox",
+      label: "Live Inbox",
+      icon: Inbox,
     },
     {
       href: "/dashboard/pricing",

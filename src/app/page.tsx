@@ -251,13 +251,7 @@ export default function LandingPage() {
 
             {/* Hero Left Content */}
             <div className="lg:col-span-7 flex flex-col items-start text-left">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#8f8afc]/20 dark:border-[#a5a1fd]/20 bg-[#8f8afc]/5 dark:bg-[#a5a1fd]/10 mb-6 shadow-sm backdrop-blur-md">
-                <span className="inline-flex rounded-full h-2 w-2 bg-[#8f8afc]"></span>
-                <span className="text-[11px] text-[#7874e0] dark:text-[#bbb8fe] font-bold tracking-wider uppercase">
-                  Autonomous Support Infrastructure
-                </span>
-              </div>
+
 
               {/* Title */}
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] mb-6 text-[#0f0f15] dark:text-white">
