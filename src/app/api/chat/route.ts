@@ -26,6 +26,7 @@ import dbConnect from '@/lib/db';
 import ChatbotSettings from '@/models/ChatbotSettings';
 import Conversation from '@/models/Conversation';
 import Subscription from '@/models/Subscription';
+import { findRelevantChunks, indexKnowledgeBase } from '@/lib/embeddings';
 
 // ---- Local Rule-based Knowledge Matcher Fallback ----
 // This ensures the chatbot ALWAYS works and replies using the configured facts,
@@ -236,17 +237,49 @@ export async function POST(request: NextRequest) {
       ? conversation.messages.slice(-20)
       : [];
 
+    // --- RAG Semantic Retrieval ---
+    // Instead of dumping 50,000 characters into the prompt, we query the vector store
+    // to retrieve only the top 3-5 most relevant excerpts for this specific message.
+    let relevantContext = '';
+    const chatbotId = settings._id.toString();
+
+    try {
+      const chunks = await findRelevantChunks(
+        message.trim(),
+        chatbotId,
+        actualOrgId,
+        4
+      );
+
+      if (chunks && chunks.length > 0) {
+        relevantContext = chunks
+          .map((chunk, idx) => `[Source Excerpt ${idx + 1} (Relevance: ${(chunk.score * 100).toFixed(0)}%)]:\n${chunk.text}`)
+          .join('\n\n');
+        console.log(`[RAG] Augmented prompt with ${chunks.length} relevant excerpts.`);
+      } else {
+        // Fallback: If no chunks exist yet for this bot, use knowledgeBase directly
+        // and trigger async indexing for future interactions
+        relevantContext = settings.knowledgeBase;
+        indexKnowledgeBase(chatbotId, actualOrgId, settings.knowledgeBase).catch((err) =>
+          console.warn('[RAG] Background auto-indexing warning:', err)
+        );
+      }
+    } catch (ragErr) {
+      console.warn('[RAG] Retrieval error, falling back to full knowledge base:', ragErr);
+      relevantContext = settings.knowledgeBase;
+    }
+
     // --- Build the AI prompt ---
     const systemPrompt = `You are a customer support assistant for ${settings.businessName}.
 
-Business Knowledge:
-${settings.knowledgeBase}
+Relevant Business Knowledge:
+${relevantContext}
 
 Instructions:
-- Answer ONLY based on the provided business knowledge above.
+- Answer based on the provided business knowledge above.
 - Be helpful, professional, friendly, and concise.
-- If the user asks something not covered in the knowledge base, politely say you don't have that information and suggest contacting ${settings.email} for further assistance.
-- Do NOT make up information that is not in the knowledge base.
+- If the user asks something not covered in the provided knowledge, politely say you don't have that information and suggest contacting ${settings.email} for further assistance.
+- Do NOT make up information that is not supported by the knowledge base.
 - Keep responses under 300 words unless the user asks for detailed information.
 - ALWAYS format lists, numbered items, doctor details, and pricing items with explicit newlines (\n) so each item or field (e.g. Name, Specialty, Email, Phone) appears on its own separate line. Never run multiple list items together on a single line.`;
 
@@ -310,7 +343,7 @@ Instructions:
       aiResponse = response.text;
     } else {
       console.warn('All Gemini models in fallback chain failed. Activating local matcher fallback.');
-      aiResponse = localKnowledgeMatcher(message, settings.knowledgeBase, settings.email);
+      aiResponse = localKnowledgeMatcher(message, relevantContext || settings.knowledgeBase, settings.email);
     }
 
     // --- Save conversation ---

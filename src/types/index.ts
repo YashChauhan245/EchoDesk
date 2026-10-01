@@ -91,3 +91,19 @@ export interface ISubscription {
   updatedAt: Date;
 }
 
+// --- Knowledge Chunk (RAG) ---
+export interface IKnowledgeChunk {
+  _id?: string;
+  organizationId: string;
+  chatbotId: string;
+  text: string;
+  chunkIndex: number;
+  embedding: number[];
+  metadata?: {
+    source?: string;
+    tokens?: number;
+  };
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+

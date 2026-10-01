@@ -10,6 +10,7 @@ import { getSession } from '@/lib/session';
 import dbConnect from '@/lib/db';
 import ChatbotSettings from '@/models/ChatbotSettings';
 import Subscription from '@/models/Subscription';
+import { indexKnowledgeBase } from '@/lib/embeddings';
 
 // ---- GET: Fetch all chatbots ----
 export async function GET() {
@@ -173,7 +174,23 @@ export async function POST(request: NextRequest) {
       await subscription.save();
     }
 
-    return NextResponse.json({ settings, message: 'Settings saved successfully' });
+    // ---- RAG VECTOR INDEXING ----
+    let chunksIndexed = 0;
+    try {
+      chunksIndexed = await indexKnowledgeBase(
+        settings._id.toString(),
+        session.organizationId,
+        knowledgeBase.trim()
+      );
+    } catch (indexErr) {
+      console.warn('[RAG] Indexing warning during save:', indexErr);
+    }
+
+    return NextResponse.json({
+      settings,
+      chunksIndexed,
+      message: 'Settings saved and knowledge base indexed successfully',
+    });
   } catch (error) {
     console.error('POST /api/settings error:', error);
     return NextResponse.json(

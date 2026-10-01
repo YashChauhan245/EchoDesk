@@ -24,23 +24,56 @@ export async function POST(request: NextRequest) {
     }
 
     // Basic URL validation
-    let parsedUrl;
+    let parsedUrl: URL;
     try {
       parsedUrl = new URL(url.trim());
+      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+        return NextResponse.json(
+          { error: 'Only HTTP and HTTPS URLs are supported' },
+          { status: 400 }
+        );
+      }
+
+      // SSRF Protection: Prevent requests to localhost, internal network, or metadata services
+      const hostname = parsedUrl.hostname.toLowerCase();
+      const isPrivateOrLocal =
+        hostname === 'localhost' ||
+        hostname === '127.0.0.1' ||
+        hostname === '0.0.0.0' ||
+        hostname === '::1' ||
+        hostname.endsWith('.local') ||
+        hostname.startsWith('10.') ||
+        hostname.startsWith('192.168.') ||
+        hostname === '169.254.169.254'; // Cloud metadata IP
+
+      if (isPrivateOrLocal) {
+        return NextResponse.json(
+          { error: 'Cannot scrape local or private network addresses' },
+          { status: 400 }
+        );
+      }
     } catch {
       return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
     }
 
-    // Fetch site HTML
+    // Fetch site HTML with a 12-second timeout
     let htmlContent = '';
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+
       const response = await fetch(parsedUrl.toString(), {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          Accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         },
+        signal: controller.signal,
         next: { revalidate: 0 }, // Disable Next.js caching
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         return NextResponse.json(
@@ -49,9 +82,24 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Ensure content is HTML/text, not a binary download
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('text/html') && !contentType.includes('text/plain') && !contentType.includes('application/xhtml+xml')) {
+        return NextResponse.json(
+          { error: 'The URL does not point to a web page (unsupported content type: ' + (contentType.split(';')[0] || 'binary') + ')' },
+          { status: 400 }
+        );
+      }
+
       htmlContent = await response.text();
-    } catch (fetchErr) {
+    } catch (fetchErr: any) {
       console.error('Failed to scrape URL:', fetchErr);
+      if (fetchErr.name === 'AbortError') {
+        return NextResponse.json(
+          { error: 'Website took too long to respond (timeout after 12s).' },
+          { status: 408 }
+        );
+      }
       return NextResponse.json(
         { error: 'Failed to access the website. Make sure the link is public and accessible.' },
         { status: 400 }
