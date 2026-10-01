@@ -26,9 +26,10 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 
 ## 🚀 Key Features
 
-*   **Multi-Tenant Knowledge Engine**: 
+*   **Multi-Tenant Knowledge Engine & RAG**: 
     *   **URL Scraper**: Dynamically extract text content from any website URL (compiled into clean markdown using `html-to-text`).
     *   **Document Processor**: Parse uploaded PDF files (extracted server-side using `pdf-parse`).
+    *   **Semantic RAG Vector Pipeline**: Intelligent text chunking, 768-dimensional vector embeddings via `gemini-embedding-001`, and dual-mode retrieval (MongoDB Atlas `$vectorSearch` with in-memory cosine fallback).
 *   **Google Gemini AI Core**: Trained context-aware chatbots powered by `@google/genai` (Google Gemini models) for fast, conversational support answers.
 *   **One-Line Embeddable Chatbot**: Public JavaScript widget ([chatbot.js](file:///c:/Users/Yash/Desktop/echodesk/public/chatbot.js)) that can be dropped into any website's HTML `<body>` to load a floating chat bubble.
 *   **Sandbox Workspace & Live Preview**: A built-in chat playground panel for developers to test chatbot configurations and preview layout variations before publishing.
