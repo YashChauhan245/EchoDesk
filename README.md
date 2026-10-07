@@ -1,6 +1,6 @@
 # EchoDesk — Enterprise AI Customer Support Chatbot Platform
 
-EchoDesk is a modern, production-grade B2B SaaS platform that enables businesses to train intelligent customer support chatbots on custom knowledge bases (product documents, files, and website URLs) and deploy them to any website in minutes with a single line of script.
+EchoDesk is a modern, production-grade B2B SaaS platform that enables businesses to train intelligent customer support chatbots on custom knowledge bases (product documents, files, and website URLs) and deploy them to any website in minutes with a single line of script. EchoDesk uses a full **Retrieval-Augmented Generation (RAG)** pipeline — knowledge bases are automatically chunked, embedded into 768-dimensional vectors via Google Gemini, and stored in MongoDB Atlas. At inference time, only the most semantically relevant excerpts are retrieved via vector search and injected into the LLM prompt, dramatically improving answer accuracy while reducing token consumption.
 
 ---
 
@@ -26,10 +26,14 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 
 ## 🚀 Key Features
 
-*   **Multi-Tenant Knowledge Engine & RAG**: 
+*   **Multi-Tenant Knowledge Engine & RAG Pipeline**: 
     *   **URL Scraper**: Dynamically extract text content from any website URL (compiled into clean markdown using `html-to-text`).
     *   **Document Processor**: Parse uploaded PDF files (extracted server-side using `pdf-parse`).
-    *   **Semantic RAG Vector Pipeline**: Intelligent text chunking, 768-dimensional vector embeddings via `gemini-embedding-001`, and dual-mode retrieval (MongoDB Atlas `$vectorSearch` with in-memory cosine fallback).
+    *   **Semantic Chunking**: Intelligent paragraph-aware text segmentation with configurable overlap windows (800-char chunks, 120-char overlap). Respects paragraph boundaries, markdown headers, and FAQ formats.
+    *   **Vector Embedding Generation**: Dense 768-dimensional embeddings generated via Google Gemini Embedding API (`gemini-embedding-001`) with multi-model fallback chain and batch processing with rate-limit throttling.
+    *   **Dual-Mode Vector Retrieval**: Primary retrieval via MongoDB Atlas `$vectorSearch` aggregation pipeline; automatic resilient fallback to in-memory cosine similarity calculation when the Atlas Search index is unavailable.
+    *   **Auto-Indexing on Save**: Knowledge base is automatically chunked and indexed into the `KnowledgeChunk` collection every time settings are saved via the dashboard. Lazy background re-indexing is triggered at chat time if chunks are missing.
+    *   **Context-Augmented Prompting**: At inference time, the top 4 most relevant knowledge excerpts (with relevance scores) are injected into the Gemini system prompt — replacing the old approach of dumping the entire 50,000-character knowledge base into context.
 *   **Google Gemini AI Core**: Trained context-aware chatbots powered by `@google/genai` (Google Gemini models) for fast, conversational support answers.
 *   **One-Line Embeddable Chatbot**: Public JavaScript widget ([chatbot.js](file:///c:/Users/Yash/Desktop/echodesk/public/chatbot.js)) that can be dropped into any website's HTML `<body>` to load a floating chat bubble.
 *   **Sandbox Workspace & Live Preview**: A built-in chat playground panel for developers to test chatbot configurations and preview layout variations before publishing.
@@ -46,7 +50,8 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 *   **Styling**: Tailwind CSS v4, PostCSS, Lucide React (Icons)
 *   **Database**: MongoDB via Mongoose (ODM)
 *   **Authentication**: Scalekit SDK (OIDC, OAuth 2.0, SAML, Google SSO, Passkeys)
-*   **AI Engine**: Google Gemini API via `@google/genai`
+*   **AI Engine**: Google Gemini API via `@google/genai` (Chat generation + Embedding generation)
+*   **Vector Search**: MongoDB Atlas Vector Search (`$vectorSearch` aggregation) with in-memory cosine similarity fallback
 *   **Payment Gateway**: Razorpay SDK (Checkout, Webhooks, Signature Verification)
 *   **Utilities**: `html-to-text` (HTML parser), `pdf-parse` (PDF text extractor), JWT session validation
 
@@ -67,8 +72,8 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 │   │   ├── layout.tsx      # Root layout (loads Plus Jakarta Sans display fonts)
 │   │   └── globals.css     # Tailwind v4 configuration, theme variables & animations
 │   ├── components/         # Reusable React components (ThemeToggle)
-│   ├── lib/                # Database connections & SDK clients (db, razorpay, scalekit, session)
-│   ├── models/             # MongoDB Mongoose schemas (User, ChatbotSettings, Conversation, Subscription)
+│   ├── lib/                # Database connections & SDK clients (db, embeddings, razorpay, scalekit, session)
+│   ├── models/             # MongoDB Mongoose schemas (User, ChatbotSettings, Conversation, KnowledgeChunk, Subscription)
 │   ├── types/              # TypeScript interface definitions
 │   └── middleware.ts       # Edge route interceptor & session protection
 └── package.json            # Dependencies & build pipelines
@@ -84,6 +89,7 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 *   [src/app/dashboard/inbox/page.tsx](file:///c:/Users/Yash/Desktop/echodesk/src/app/dashboard/inbox/page.tsx): Live Inbox — two-panel conversation viewer with search, pagination, flagged filter, and CSV/JSON/PDF export.
 *   [src/app/dashboard/pricing/page.tsx](file:///c:/Users/Yash/Desktop/echodesk/src/app/dashboard/pricing/page.tsx): Manage active levels (Free, Starter, Pro) with complete Razorpay integration.
 *   [src/app/test/page.tsx](file:///c:/Users/Yash/Desktop/echodesk/src/app/test/page.tsx): Simulated storefront web page designed to debug the widget script and bubble responsiveness.
+*   [src/lib/embeddings.ts](file:///c:/Users/Yash/Desktop/echodesk/src/lib/embeddings.ts): Core RAG module — text chunking (`chunkText`), Gemini embedding generation (`generateEmbedding`, `generateEmbeddingsBatch`), vector indexing (`indexKnowledgeBase`), and hybrid retrieval (`findRelevantChunks`) with Atlas `$vectorSearch` and cosine similarity fallback.
 *   [src/middleware.ts](file:///c:/Users/Yash/Desktop/echodesk/src/middleware.ts): Edge middleware restricting non-public access to `/dashboard/*` when no active session cookie is present.
 
 ---
@@ -102,9 +108,9 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 *   **GET** `/api/settings`
     *   Fetch all active chatbots and current subscription details for the authorized organization.
 *   **POST** `/api/settings`
-    *   Create or update chatbot definitions (name, welcome message, hex custom theme, knowledge text).
+    *   Create or update chatbot definitions (name, welcome message, hex custom theme, knowledge text). Automatically triggers RAG vector indexing — the knowledge base is chunked, embedded, and stored in the `KnowledgeChunk` collection. Returns `chunksIndexed` count on success.
 *   **POST** `/api/chat`
-    *   Submit a user message. Uses Google Gemini API to return context-informed answers based on organization training data.
+    *   Submit a user message. Uses RAG retrieval (`findRelevantChunks`) to fetch the top 4 semantically relevant knowledge excerpts, injects them into the Gemini system prompt, and returns an AI response. Falls back to full knowledge base injection if no vector chunks exist, and triggers lazy background re-indexing. Includes a local rule-based knowledge matcher as a final fallback when Gemini API is unavailable.
 *   **GET** `/api/widget`
     *   Retrieve public chatbot details (custom theme, names, welcome greeting) to load in the embeddable script.
 
@@ -155,7 +161,17 @@ Defined in [src/models/Conversation.ts](file:///c:/Users/Yash/Desktop/echodesk/s
 *   `sessionId`: Session identifier persistent in visitor browser.
 *   `messages`: Embedded array containing `{ role: 'user' | 'assistant', content: string, timestamp: Date }`.
 
-### 4. Subscription Schema
+### 4. KnowledgeChunk Schema (RAG)
+Defined in [src/models/KnowledgeChunk.ts](file:///c:/Users/Yash/Desktop/echodesk/src/models/KnowledgeChunk.ts). Stores segmented text chunks and their dense vector embeddings for semantic retrieval:
+*   `organizationId`: Tenant isolation key (indexed).
+*   `chatbotId`: References the chatbot this chunk belongs to (indexed).
+*   `text`: The raw text content of this knowledge chunk.
+*   `chunkIndex`: Positional index of the chunk within the source document.
+*   `embedding`: `number[]` — Dense 768-dimensional vector embedding generated by Gemini Embedding API.
+*   `metadata`: `{ source: string, tokens: number }` — Provenance and estimated token count.
+*   **Indexes**: Compound `(chatbotId, chunkIndex)` for fast ordered lookups; `organizationId` for tenant scoping. Atlas Vector Search index (`vector_index`) on the `embedding` field for `$vectorSearch` queries.
+
+### 5. Subscription Schema
 Defined in [src/models/Subscription.ts](file:///c:/Users/Yash/Desktop/echodesk/src/models/Subscription.ts). Tracks API credits and chatbot instantiation rules:
 *   `plan`: `'FREE' | 'STARTER' | 'PRO'`.
 *   `limits`: `{ maxChatbots, maxWebsites, maxMessages }`.
