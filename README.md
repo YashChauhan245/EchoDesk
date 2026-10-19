@@ -34,7 +34,7 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
     *   **Dual-Mode Vector Retrieval**: Primary retrieval via MongoDB Atlas `$vectorSearch` aggregation pipeline; automatic resilient fallback to in-memory cosine similarity calculation when the Atlas Search index is unavailable.
     *   **Auto-Indexing on Save**: Knowledge base is automatically chunked and indexed into the `KnowledgeChunk` collection every time settings are saved via the dashboard. Lazy background re-indexing is triggered at chat time if chunks are missing.
     *   **Context-Augmented Prompting**: At inference time, the top 4 most relevant knowledge excerpts (with relevance scores) are injected into the Gemini system prompt — replacing the old approach of dumping the entire 50,000-character knowledge base into context.
-*   **Google Gemini AI Core**: Trained context-aware chatbots powered by `@google/genai` (Google Gemini models) for fast, conversational support answers.
+*   **Google Gemini AI Core & Resilient Fallback Chain**: Fast, conversational support answers powered by `@google/genai`. Built with an automatic 5-stage model fallback chain (`gemini-2.0-flash` → `gemini-2.5-flash` → `gemini-1.5-flash` → `gemini-1.5-pro` → `gemini-2.0-flash-exp`) and an offline rule-based local keyword matcher, ensuring zero downtime even during API quota exhaustion.
 *   **One-Line Embeddable Chatbot**: Public JavaScript widget ([chatbot.js](file:///c:/Users/Yash/Desktop/echodesk/public/chatbot.js)) that can be dropped into any website's HTML `<body>` to load a floating chat bubble.
 *   **Sandbox Workspace & Live Preview**: A built-in chat playground panel for developers to test chatbot configurations and preview layout variations before publishing.
 *   **Live Inbox & Conversation Viewer**: Full paginated inbox dashboard (`/dashboard/inbox`) where admins can browse all visitor chat sessions, read complete message threads, search by session or content, filter flagged (low-confidence) bot responses with amber highlights, and export any conversation as CSV, JSON, or print-ready PDF.
@@ -53,6 +53,7 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 *   **AI Engine**: Google Gemini API via `@google/genai` (Chat generation + Embedding generation)
 *   **Vector Search**: MongoDB Atlas Vector Search (`$vectorSearch` aggregation) with in-memory cosine similarity fallback
 *   **Payment Gateway**: Razorpay SDK (Checkout, Webhooks, Signature Verification)
+*   **Containerization**: Docker & Docker Compose (Multi-stage build for minimal production runner, local MongoDB orchestration)
 *   **Utilities**: `html-to-text` (HTML parser), `pdf-parse` (PDF text extractor), JWT session validation
 
 ---
@@ -76,6 +77,8 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 │   ├── models/             # MongoDB Mongoose schemas (User, ChatbotSettings, Conversation, KnowledgeChunk, Subscription)
 │   ├── types/              # TypeScript interface definitions
 │   └── middleware.ts       # Edge route interceptor & session protection
+├── Dockerfile              # Multi-stage production container image
+├── docker-compose.yml      # Local container orchestration with MongoDB 7.0
 └── package.json            # Dependencies & build pipelines
 ```
 
@@ -97,12 +100,12 @@ EchoDesk powers live 24/7 AI customer support widgets across web applications:
 ## 📡 API Reference
 
 ### 🔐 Authentication & Accounts
-*   **POST** `/api/auth/login`
+*   **GET** `/api/auth/login`
     *   Initiates Scalekit Single Sign-On (SSO) login/redirection flow or passkey challenges.
 *   **GET** `/api/auth/callback`
     *   OAuth 2.0 callback code verification handler. Creates a secure session cookie on success.
-*   **POST** `/api/auth/logout`
-    *   Destroys the session and clears authentication cookies.
+*   **GET** `/api/auth/logout`
+    *   Destroys the session, clears authentication cookies, and redirects to the home page.
 
 ### 🤖 Chatbot Settings & Inference
 *   **GET** `/api/settings`
@@ -227,6 +230,13 @@ Generate the optimized production bundle:
 ```bash
 npm run build
 ```
+
+### 4. Run with Docker Compose (Alternative)
+Launch both the application and a local MongoDB instance in an isolated container environment:
+```bash
+docker compose up --build
+```
+This starts MongoDB on port `27017` and the EchoDesk web app on port `3001` ([http://localhost:3001](http://localhost:3001)).
 
 ---
 
