@@ -9,19 +9,29 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-    }
+    const syncTheme = () =>
+      setTheme(
+        document.documentElement.classList.contains("dark") ? "dark" : "light",
+      );
+    syncTheme();
+    // Keep the navbar and footer controls in sync with the active document theme.
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
   }, []);
 
   const toggleTheme = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
     setTheme(nextTheme);
-    localStorage.setItem("theme", nextTheme);
-    
+    try {
+      localStorage.setItem("theme", nextTheme);
+    } catch {
+      /* Theme still works when storage is unavailable. */
+    }
+
     if (nextTheme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
@@ -30,7 +40,9 @@ export default function ThemeToggle() {
   };
 
   if (!mounted) {
-    return <div className="w-9 h-9 rounded-full border border-black/[0.08] dark:border-white/[0.08] opacity-50" />;
+    return (
+      <div className="w-9 h-9 rounded-full border border-black/[0.08] dark:border-white/[0.08] opacity-50" />
+    );
   }
 
   return (
