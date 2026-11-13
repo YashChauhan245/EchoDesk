@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import TrustStrip from "@/components/marketing/TrustStrip";
 import Hero from "@/components/marketing/Hero";
 import Navbar from "@/components/marketing/Navbar";
 import { MarketingShell } from "@/components/marketing/Shared";
@@ -12,5 +13,5 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
-  return <MarketingShell><Navbar /><main id="main"><Hero /></main></MarketingShell>;
+  return <MarketingShell><Navbar /><main id="main"><Hero /><TrustStrip /></main></MarketingShell>;
 }
