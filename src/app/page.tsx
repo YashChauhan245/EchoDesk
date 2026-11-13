@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import CaseStudy from "@/components/marketing/CaseStudy";
 import InboxShowcase from "@/components/marketing/InboxShowcase";
 import EmbedDemo from "@/components/marketing/EmbedDemo";
 import FeatureBento from "@/components/marketing/FeatureBento";
@@ -18,5 +19,5 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
-  return <MarketingShell><Navbar /><main id="main"><Hero /><TrustStrip /><HowItWorks /><RagPipeline /><FeatureBento /><EmbedDemo /><InboxShowcase /></main></MarketingShell>;
+  return <MarketingShell><Navbar /><main id="main"><Hero /><TrustStrip /><HowItWorks /><RagPipeline /><FeatureBento /><EmbedDemo /><InboxShowcase /><CaseStudy /></main></MarketingShell>;
 }
