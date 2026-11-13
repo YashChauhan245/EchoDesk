@@ -1,0 +1,12 @@
+import { Check, LockKeyhole } from "lucide-react";
+import { Action, Reveal, SectionHeading } from "./Shared";
+// Mirrors src/app/dashboard/pricing/PricingClient.tsx. Billing remains in the existing dashboard flow.
+const plans = [
+  { name: "Free", price: "0", description: "Get to know your new teammate.", features: ["1 AI chatbot", "1 website deployment", "500 AI messages / month", "Standard support"], cta: "Start building free", href: "/login", popular: false },
+  { name: "Starter", price: "799", description: "A little more room to grow.", features: ["3 AI chatbots", "3 website deployments", "10,000 AI messages / month", "Fast response support", "Custom widget branding"], cta: "Choose Starter", href: "/dashboard/pricing", popular: false },
+  { name: "Pro", price: "2,499", description: "Built for your next chapter.", features: ["10 AI chatbots", "10 website deployments", "50,000 AI messages / month", "Priority 24/7 support", "Custom widget branding", "Advanced training context limit"], cta: "Go with Pro", href: "/dashboard/pricing", popular: true },
+];
+export default function Pricing() {
+  return <section id="pricing" className="mk-section mk-container"><Reveal><SectionHeading centered eyebrow="SUPPORT THAT SCALES WITH YOU" title={<>A plan for your<br /><span className="mk-gradient">next great chapter.</span></>}>Start free. Get more room when you need it.<br />Simple monthly plans, in Indian rupees.</SectionHeading></Reveal><div className="mk-pricing-grid">{plans.map((plan, index) => <Reveal key={plan.name} delay={index * .08}><article className={`mk-price-card ${plan.popular ? "mk-price-popular" : ""}`}>{plan.popular && <span className="mk-popular-label"><Sparkle />MOST POPULAR</span>}<div className="mk-plan-heading"><h3>{plan.name}</h3><span>0{index + 1}</span></div><p className="mk-plan-description">{plan.description}</p><div className="mk-plan-price"><span>₹</span>{plan.price}<small>/ month</small></div><Action href={plan.href} secondary={!plan.popular}>{plan.cta}</Action><span className="mk-plan-includes">{index === 0 ? "YOUR FIRST STEP STARTS HERE" : "A LITTLE MORE POSSIBILITY"}</span><ul>{plan.features.map(feature => <li key={feature}><Check size={13} />{feature}</li>)}</ul></article></Reveal>)}</div><Reveal><p className="mk-pricing-note"><LockKeyhole size={12} />Paid plans are billed monthly through Razorpay. Free stays free.</p></Reveal></section>;
+}
+function Sparkle() { return <span aria-hidden="true">✧</span>; }
