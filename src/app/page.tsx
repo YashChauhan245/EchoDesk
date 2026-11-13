@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import EmbedDemo from "@/components/marketing/EmbedDemo";
 import FeatureBento from "@/components/marketing/FeatureBento";
 import RagPipeline from "@/components/marketing/RagPipeline";
 import HowItWorks from "@/components/marketing/HowItWorks";
@@ -16,5 +17,5 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
-  return <MarketingShell><Navbar /><main id="main"><Hero /><TrustStrip /><HowItWorks /><RagPipeline /><FeatureBento /></main></MarketingShell>;
+  return <MarketingShell><Navbar /><main id="main"><Hero /><TrustStrip /><HowItWorks /><RagPipeline /><FeatureBento /><EmbedDemo /></main></MarketingShell>;
 }
