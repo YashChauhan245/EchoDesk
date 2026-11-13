@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Plus_Jakarta_Sans, Outfit } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans, Outfit, Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -8,16 +8,21 @@ const inter = Inter({
 });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
+  preload: false,
   subsets: ["latin"],
   variable: "--font-plus-jakarta",
   weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 const outfit = Outfit({
+  preload: false,
   subsets: ["latin"],
   variable: "--font-outfit",
   weight: ["400", "500", "600", "700", "800"],
 });
+
+const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-code", preload: false });
 
 export const metadata: Metadata = {
   title: "EchoDesk — AI Customer Support Chatbot Platform",
@@ -54,7 +59,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${plusJakartaSans.variable} ${outfit.variable} antialiased`} suppressHydrationWarning>
+      <body className={`${inter.variable} ${plusJakartaSans.variable} ${outfit.variable} ${display.variable} ${mono.variable} antialiased`} suppressHydrationWarning>
         {children}
       </body>
     </html>
