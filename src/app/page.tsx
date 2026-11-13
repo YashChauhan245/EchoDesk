@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import FeatureBento from "@/components/marketing/FeatureBento";
 import RagPipeline from "@/components/marketing/RagPipeline";
 import HowItWorks from "@/components/marketing/HowItWorks";
 import TrustStrip from "@/components/marketing/TrustStrip";
@@ -15,5 +16,5 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
-  return <MarketingShell><Navbar /><main id="main"><Hero /><TrustStrip /><HowItWorks /><RagPipeline /></main></MarketingShell>;
+  return <MarketingShell><Navbar /><main id="main"><Hero /><TrustStrip /><HowItWorks /><RagPipeline /><FeatureBento /></main></MarketingShell>;
 }
