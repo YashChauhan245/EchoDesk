@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import RagPipeline from "@/components/marketing/RagPipeline";
 import HowItWorks from "@/components/marketing/HowItWorks";
 import TrustStrip from "@/components/marketing/TrustStrip";
 import Hero from "@/components/marketing/Hero";
@@ -14,5 +15,5 @@ export const metadata: Metadata = {
 };
 
 export default function LandingPage() {
-  return <MarketingShell><Navbar /><main id="main"><Hero /><TrustStrip /><HowItWorks /></main></MarketingShell>;
+  return <MarketingShell><Navbar /><main id="main"><Hero /><TrustStrip /><HowItWorks /><RagPipeline /></main></MarketingShell>;
 }
