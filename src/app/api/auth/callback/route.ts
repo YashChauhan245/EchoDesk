@@ -55,17 +55,17 @@ export async function GET(request: NextRequest) {
 
     const scalekitClient = getScalekitClient();
 
-    // Exchange the authorization code for user profile + tokens
-    const authResult = await scalekitClient.authenticateWithCode(code, redirectUri);
+    // Start the connection while Scalekit verifies the code. Both must succeed.
+    const [authResult] = await Promise.all([
+      scalekitClient.authenticateWithCode(code, redirectUri),
+      dbConnect(),
+    ]);
 
     const { user } = authResult;
 
     if (!user || !user.id) {
       throw new Error('No user data returned from Scalekit');
     }
-
-    // Connect to MongoDB
-    await dbConnect();
 
     // The idToken contains the organization ID (oid claim)
     // We need to decode it to get the org ID

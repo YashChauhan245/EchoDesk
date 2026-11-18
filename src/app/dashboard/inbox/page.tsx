@@ -32,17 +32,15 @@ export default async function InboxPage({
   await dbConnect();
 
   // Fetch the first page of conversations server-side
-  const conversations = await Conversation.find({
-    organizationId: session.organizationId,
-  })
-    .sort({ updatedAt: -1 })
-    .limit(20)
-    .select({ sessionId: 1, messages: 1, createdAt: 1, updatedAt: 1 })
-    .lean();
-
-  const total = await Conversation.countDocuments({
-    organizationId: session.organizationId,
-  });
+  const organizationFilter = { organizationId: session.organizationId };
+  const [conversations, total] = await Promise.all([
+    Conversation.find(organizationFilter)
+      .sort({ updatedAt: -1 })
+      .limit(20)
+      .select({ sessionId: 1, messages: 1, createdAt: 1, updatedAt: 1 })
+      .lean(),
+    Conversation.countDocuments(organizationFilter),
+  ]);
 
   const FALLBACK_PHRASES = [
     "i don't have that information",
