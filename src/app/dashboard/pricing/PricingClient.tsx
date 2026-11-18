@@ -1,5 +1,7 @@
 "use client";
 
+import { PageHeading, StatusBadge } from "@/app/dashboard/DashboardUI";
+
 import { useState, useEffect } from "react";
 import { Check, Loader2, Sparkles, ShieldAlert } from "lucide-react";
 import type { ISubscription } from "@/types";
@@ -10,7 +12,11 @@ interface PricingClientProps {
   userName: string;
 }
 
-export default function PricingClient({ subscription, userEmail, userName }: PricingClientProps) {
+export default function PricingClient({
+  subscription,
+  userEmail,
+  userName,
+}: PricingClientProps) {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rzpLoaded, setRzpLoaded] = useState(false);
@@ -109,7 +115,9 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
 
       // 2. Handle Mock Mode bypass
       if (isMock) {
-        console.log("[Razorpay Frontend] Running in Mock Mode. Simulating checkout...");
+        console.log(
+          "[Razorpay Frontend] Running in Mock Mode. Simulating checkout...",
+        );
         setTimeout(async () => {
           try {
             const verifyRes = await fetch("/api/razorpay/verify", {
@@ -126,7 +134,9 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
 
             const verifyData = await verifyRes.json();
             if (!verifyRes.ok) {
-              throw new Error(verifyData.error || "Mock payment verification failed");
+              throw new Error(
+                verifyData.error || "Mock payment verification failed",
+              );
             }
 
             window.location.href = "/dashboard?checkout=success";
@@ -143,7 +153,10 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
         key: keyId,
         subscription_id: subscriptionId,
         name: "EchoDesk",
-        description: planId === "PRO" ? "Pro Plan Subscription" : "Starter Plan Subscription",
+        description:
+          planId === "PRO"
+            ? "Pro Plan Subscription"
+            : "Starter Plan Subscription",
         handler: async function (response: any) {
           setLoadingPlan(planId);
           try {
@@ -162,7 +175,9 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
 
             const verifyData = await verifyRes.json();
             if (!verifyRes.ok) {
-              throw new Error(verifyData.error || "Payment verification failed");
+              throw new Error(
+                verifyData.error || "Payment verification failed",
+              );
             }
 
             // Redirect on success
@@ -196,26 +211,24 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
   }
 
   return (
-    <div className="animate-fade-in space-y-10 max-w-5xl mx-auto">
+    <div className="space-y-7 max-w-none mx-auto">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white">
-          Simple, Transparent Plans
-        </h1>
-        <p className="text-sm sm:text-base text-[#5f6368] dark:text-[#94a3b8] max-w-xl mx-auto">
-          Scale your automated support workspace seamlessly. Choose the plan that fits your customer interaction volume.
-        </p>
-      </div>
+      <PageHeading
+        eyebrow="Billing & plans"
+        title="Room for your next chapter."
+        description="Choose the right amount of support for your business."
+        actions={<StatusBadge>{currentPlan} plan</StatusBadge>}
+      />
 
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl max-w-xl mx-auto text-sm animate-fade-in">
+        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg max-w-xl mx-auto text-sm">
           <ShieldAlert className="w-5 h-5 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-stretch pt-4">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-5 items-stretch pt-4">
         {plans.map((plan) => {
           const isCurrent = currentPlan === plan.id;
           const isLoading = loadingPlan === plan.id;
@@ -223,29 +236,24 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
           return (
             <div
               key={plan.id}
-              className={`glass-card p-8 flex flex-col justify-between border relative overflow-hidden transition-all duration-300 ${
+              className={`rounded-lg border border-[var(--dash-border)] bg-[var(--dash-panel)] p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-300 ${
                 plan.popular
-                  ? "border-[#8f8afc]/25 shadow-[0_25px_50px_-12px_rgba(143,138,252,0.12)] bg-[#fafafa] dark:bg-[#0c0c16]/95 lg:scale-[1.05] lg:-translate-y-2 z-10"
+                  ? "border-[var(--dash-border)] bg-[var(--dash-panel)] z-10"
                   : isCurrent
-                    ? "border-[#10b981]/30 bg-[#fafafa] dark:bg-[#09090f]"
-                    : "border-black/[0.015] dark:border-white/[0.015] bg-[#fafafa] dark:bg-[#09090f]"
-              }`}
+                    ? "border-[#10b981]/30 bg-[var(--dash-panel)]"
+                    : "border-[var(--dash-border)] bg-[var(--dash-panel)]"
+              } `}
             >
-              {/* Glow Accent for Popular */}
-              {plan.popular && (
-                <div className="absolute top-0 right-0 left-0 h-[2px] bg-[#8f8afc]/20" />
-              )}
-
               {/* Active Plan Badge */}
               {isCurrent && (
-                <div className="absolute top-4 left-4 flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-[#10b981]/20 bg-[#10b981]/5 text-[#10b981] text-[9px] font-semibold uppercase tracking-wider">
+                <div className="mb-4 self-start inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-[#10b981]/20 bg-[#10b981]/5 text-[#10b981] text-[11px] font-medium uppercase tracking-wider">
                   Active Plan
                 </div>
               )}
 
               {/* Popular Badge */}
               {plan.popular && (
-                <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#8f8afc]/15 bg-[#8f8afc]/5 text-[#8f8afc] text-[10px] font-bold uppercase tracking-wider">
+                <div className="mb-4 self-start inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-[var(--dash-border)] bg-[var(--dash-selected)] text-[var(--dash-accent)] text-[11px] font-medium uppercase tracking-wider">
                   <Sparkles className="w-3 h-3" />
                   Most Popular
                 </div>
@@ -253,32 +261,32 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
 
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-bold text-[#0f0f15] dark:text-white mb-2">
+                  <h3 className="text-lg font-medium text-[var(--dash-text)] mb-2">
                     {plan.name}
                   </h3>
-                  <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] leading-relaxed">
+                  <p className="text-xs text-[var(--dash-muted)] leading-relaxed">
                     {plan.description}
                   </p>
                 </div>
 
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-[#0f0f15] dark:text-white">
+                  <span className="text-3xl sm:text-4xl font-medium text-[var(--dash-text)]">
                     {plan.price}
                   </span>
-                  <span className="text-xs text-[#5f6368] dark:text-[#94a3b8]">
+                  <span className="text-xs text-[var(--dash-muted)]">
                     / month
                   </span>
                 </div>
 
                 {/* Divider */}
-                <div className="h-[1px] bg-black/[0.015] dark:bg-white/[0.015]" />
+                <div className="h-px bg-[var(--dash-border)]" />
 
                 {/* Features */}
                 <ul className="space-y-3.5">
                   {plan.limits.map((limit, idx) => (
                     <li
                       key={idx}
-                      className="flex items-start gap-3 text-xs text-[#5f6368] dark:text-[#94a3b8]"
+                      className="flex items-start gap-3 text-xs text-[var(--dash-muted)]"
                     >
                       <Check className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
                       <span>{limit}</span>
@@ -293,14 +301,14 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
                   isCurrent ? (
                     <button
                       disabled
-                      className="w-full btn-secondary justify-center !py-3 text-xs font-semibold uppercase tracking-wider cursor-default opacity-80"
+                      className="w-full inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-[var(--dash-border)] bg-[var(--dash-panel)] px-3.5 py-2 text-[13px] font-medium text-[var(--dash-text)] transition-colors hover:bg-[var(--dash-hover)] disabled:cursor-not-allowed disabled:opacity-50 !py-3 text-xs cursor-default opacity-80"
                     >
                       Current Plan ✓
                     </button>
                   ) : (
                     <button
                       disabled
-                      className="w-full btn-secondary justify-center !py-3 text-xs font-semibold uppercase tracking-wider cursor-default opacity-50"
+                      className="w-full inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-[var(--dash-border)] bg-[var(--dash-panel)] px-3.5 py-2 text-[13px] font-medium text-[var(--dash-text)] transition-colors hover:bg-[var(--dash-hover)] disabled:cursor-not-allowed disabled:opacity-50 !py-3 text-xs cursor-default opacity-50"
                     >
                       Free Tier
                     </button>
@@ -308,7 +316,7 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
                 ) : isCurrent ? (
                   <button
                     disabled
-                    className="w-full btn-primary justify-center !py-3 text-xs font-semibold uppercase tracking-wider cursor-default"
+                    className="w-full inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-transparent bg-[var(--dash-button)] px-3.5 py-2 text-[13px] font-medium text-[var(--dash-button-text)] transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 !py-3 text-xs cursor-default"
                     style={{
                       background: "transparent",
                       borderColor: "var(--border-glow)",
@@ -321,9 +329,11 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
                   <button
                     onClick={() => handleUpgrade(plan.id)}
                     disabled={!!loadingPlan}
-                    className={`w-full justify-center !py-3 text-xs font-semibold uppercase tracking-wider cursor-pointer flex items-center gap-2 ${
-                      plan.popular ? "btn-primary" : "btn-secondary"
-                    }`}
+                    className={`w-full justify-center !py-3 text-xs font-medium cursor-pointer flex items-center gap-2 ${
+                      plan.popular
+                        ? "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-transparent bg-[var(--dash-button)] px-3.5 py-2 text-[13px] font-medium text-[var(--dash-button-text)] transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                        : "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-[var(--dash-border)] bg-[var(--dash-panel)] px-3.5 py-2 text-[13px] font-medium text-[var(--dash-text)] transition-colors hover:bg-[var(--dash-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+                    } `}
                   >
                     {isLoading ? (
                       <>
@@ -342,8 +352,9 @@ export default function PricingClient({ subscription, userEmail, userName }: Pri
       </div>
 
       {/* Trust & Guarantee */}
-      <div className="text-center text-xs text-[#5f6368] dark:text-[#475569] pt-6 max-w-md mx-auto">
-        Payments processed securely via Razorpay. Cancel or change plans at any time from your Billing Dashboard.
+      <div className="text-center text-xs text-[var(--dash-muted)] pt-6 max-w-md mx-auto">
+        Payments are processed securely through Razorpay. Your current plan is
+        shown above.
       </div>
     </div>
   );

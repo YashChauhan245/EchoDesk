@@ -6,22 +6,28 @@
 // for fast first load, then hands off to the client.
 // ===========================================
 
-import { getSession } from '@/lib/session';
-import { redirect } from 'next/navigation';
-import dbConnect from '@/lib/db';
-import Conversation from '@/models/Conversation';
-import InboxClient from './InboxClient';
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
+import dbConnect from "@/lib/db";
+import Conversation from "@/models/Conversation";
+import InboxClient from "./InboxClient";
 
 export const metadata = {
-  title: 'Live Inbox — EchoDesk',
-  description: 'Browse and review all visitor chat conversations',
+  title: "Live Inbox — EchoDesk",
+  description: "Browse and review all visitor chat conversations",
 };
 
-export default async function InboxPage() {
+export default async function InboxPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ session?: string }>;
+}) {
   const session = await getSession();
   if (!session) {
-    redirect('/api/auth/login');
+    redirect("/api/auth/login");
   }
+
+  const { session: initialSessionId } = await searchParams;
 
   await dbConnect();
 
@@ -54,10 +60,13 @@ export default async function InboxPage() {
   // Serialize for the client
   const items = conversations.map((conv) => {
     const messages = conv.messages || [];
-    const firstUserMsg = messages.find((m: { role: string; content: string; timestamp?: Date }) => m.role === 'user');
+    const firstUserMsg = messages.find(
+      (m: { role: string; content: string; timestamp?: Date }) =>
+        m.role === "user",
+    );
     const lastMsg = messages[messages.length - 1];
     const isFlagged = messages.some((m: { role: string; content: string }) => {
-      if (m.role !== 'assistant') return false;
+      if (m.role !== "assistant") return false;
       const lower = m.content.toLowerCase();
       return FALLBACK_PHRASES.some((phrase) => lower.includes(phrase));
     });
@@ -69,7 +78,7 @@ export default async function InboxPage() {
       isFlagged,
       preview: firstUserMsg?.content
         ? firstUserMsg.content.slice(0, 120)
-        : 'No messages yet',
+        : "No messages yet",
       lastMessage: lastMsg
         ? {
             role: lastMsg.role,
@@ -88,11 +97,11 @@ export default async function InboxPage() {
     };
   });
 
-
   return (
     <InboxClient
       initialConversations={items}
       totalConversations={total}
+      initialSessionId={initialSessionId}
     />
   );
 }

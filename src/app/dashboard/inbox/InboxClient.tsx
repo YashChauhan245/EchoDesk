@@ -1,8 +1,9 @@
 "use client";
 
+import { PageHeading } from "@/app/dashboard/DashboardUI";
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  Inbox,
   Search,
   MessageSquare,
   Bot,
@@ -59,6 +60,7 @@ interface ConversationDetail {
 interface InboxClientProps {
   initialConversations: ConversationItem[];
   totalConversations: number;
+  initialSessionId?: string;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -123,7 +125,7 @@ function exportAsCSV(detail: ConversationDetail) {
   downloadFile(
     csv,
     `conversation-${detail.sessionId.slice(-8)}.csv`,
-    "text/csv"
+    "text/csv",
   );
 }
 
@@ -141,7 +143,7 @@ function exportAsJSON(detail: ConversationDetail) {
   downloadFile(
     JSON.stringify(payload, null, 2),
     `conversation-${detail.sessionId.slice(-8)}.json`,
-    "application/json"
+    "application/json",
   );
 }
 
@@ -156,7 +158,7 @@ function exportAsPDF(detail: ConversationDetail) {
           <p>${m.content.replace(/\n/g, "<br>")}</p>
           ${m.timestamp ? `<span class="ts">${formatFullTimestamp(m.timestamp)}</span>` : ""}
         </div>
-      </div>`
+      </div>`,
     )
     .join("");
 
@@ -200,6 +202,7 @@ function exportAsPDF(detail: ConversationDetail) {
 export default function InboxClient({
   initialConversations,
   totalConversations,
+  initialSessionId,
 }: InboxClientProps) {
   // ── State ──
   const [conversations, setConversations] =
@@ -213,11 +216,15 @@ export default function InboxClient({
   const [loadingList, setLoadingList] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
+    null,
+  );
   const [detail, setDetail] = useState<ConversationDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
-  const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
+  const [deletingSessionId, setDeletingSessionId] = useState<string | null>(
+    null,
+  );
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
 
@@ -265,7 +272,10 @@ export default function InboxClient({
   // ── Close export menu on outside click ──
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+      if (
+        exportMenuRef.current &&
+        !exportMenuRef.current.contains(e.target as Node)
+      ) {
         setExportMenuOpen(false);
       }
     }
@@ -300,7 +310,7 @@ export default function InboxClient({
         setRefreshing(false);
       }
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -312,7 +322,9 @@ export default function InboxClient({
     setLoadingDetail(true);
     setDetail(null);
     try {
-      const res = await fetch(`/api/conversations/${encodeURIComponent(sessionId)}`);
+      const res = await fetch(
+        `/api/conversations/${encodeURIComponent(sessionId)}`,
+      );
       if (!res.ok) throw new Error("Failed to fetch conversation");
       const data = await res.json();
       setDetail(data.conversation);
@@ -330,13 +342,24 @@ export default function InboxClient({
     setExportMenuOpen(false);
   }
 
+  // Recent conversations on the overview open their matching thread.
+  useEffect(() => {
+    if (!initialSessionId) return;
+    setSelectedSessionId(initialSessionId);
+    setMobileShowThread(true);
+    fetchDetail(initialSessionId);
+  }, [initialSessionId, fetchDetail]);
+
   // ── Delete conversation ──
   async function handleDelete(sessionId: string) {
     setDeletingSessionId(sessionId);
     try {
-      const res = await fetch(`/api/conversations/${encodeURIComponent(sessionId)}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/conversations/${encodeURIComponent(sessionId)}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (!res.ok) throw new Error("Failed to delete");
 
       setConversations((prev) => prev.filter((c) => c.sessionId !== sessionId));
@@ -381,120 +404,114 @@ export default function InboxClient({
   const flaggedCount = conversations.filter((c) => c.isFlagged).length;
 
   return (
-    <div className="animate-fade-in h-full relative">
+    <div className="h-full relative">
       {/* Toast */}
       {toast && (
         <div
-          className={`fixed top-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-lg text-sm font-medium transition-all duration-300 ${
+          className={`fixed top-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 rounded-lg border text-sm font-medium transition-all duration-300 ${
             toast.type === "success"
               ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
               : "bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800"
-          }`}
+          } `}
         >
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           {toast.message}
-          <button onClick={() => setToast(null)} className="ml-1 hover:opacity-70 transition-opacity">
+          <button
+            onClick={() => setToast(null)}
+            className="ml-1 hover:opacity-70 transition-opacity"
+          >
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {/* Page Header */}
-      <div className="space-y-4 mb-8">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-black/[0.03] dark:border-white/[0.06] bg-black/[0.01] dark:bg-white/[0.015] mb-1">
-          <Inbox className="w-3.5 h-3.5 text-black dark:text-white" />
-          <span className="text-[10px] text-[#0f0f15] dark:text-white font-bold uppercase tracking-widest">
-            Live Inbox
+      <PageHeading
+        eyebrow="Conversations"
+        title="Keep the connection."
+        description="Review customer questions, find gaps in your knowledge, and export conversations."
+        actions={
+          <span className="text-[13px] text-[var(--dash-muted)]">
+            {total.toLocaleString()} sessions
           </span>
-        </div>
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0f0f15] dark:text-white mb-2.5">
-              Conversation Inbox
-            </h1>
-            <p className="text-xs sm:text-sm text-[#5f6368] dark:text-[#94a3b8] leading-relaxed">
-              Browse and review every visitor chat session. Export transcripts or filter flagged responses.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Stats pill */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/[0.025] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06]">
-              <MessageSquare className="w-3.5 h-3.5 text-[#8f8afc]" />
-              <span className="text-xs font-bold text-[#0f0f15] dark:text-white">
-                {total.toLocaleString()}
-              </span>
-              <span className="text-[10px] text-[#5f6368] dark:text-[#94a3b8]">sessions</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Main Two-Panel Layout */}
-      <div className="glass-card overflow-hidden" style={{ minHeight: "600px" }}>
+      <div
+        className="rounded-lg border border-[var(--dash-border)] bg-[var(--dash-panel)] overflow-hidden"
+        style={{ minHeight: "600px" }}
+      >
         <div className="flex h-full" style={{ minHeight: "600px" }}>
-
           {/* ── Left Panel: Conversation List ────────────────────────── */}
           <div
-            className={`flex flex-col border-r border-black/[0.04] dark:border-white/[0.06] ${
+            className={`flex flex-col border-r border-[var(--dash-border)] ${
               mobileShowThread ? "hidden lg:flex" : "flex"
             } w-full lg:w-[360px] flex-shrink-0`}
           >
             {/* Toolbar */}
-            <div className="p-3.5 border-b border-black/[0.04] dark:border-white/[0.06] space-y-2">
+            <div className="p-3.5 border-b border-[var(--dash-border)] space-y-2">
               {/* Search */}
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5f6368] dark:text-[#94a3b8] pointer-events-none" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--dash-muted)] pointer-events-none" />
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    aria-label="Search conversations"
                     placeholder="Search sessions or messages…"
-                    className="w-full pl-8 pr-8 py-2 text-[11px] rounded-lg bg-black/[0.025] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] text-[#0f0f15] dark:text-white placeholder-[#94a3b8] focus:outline-none focus:ring-1 focus:ring-[#8f8afc]/30 dark:focus:ring-[#8f8afc]/20 transition-all"
+                    className="w-full pl-8 pr-8 py-2 text-[11px] rounded-lg bg-[var(--dash-panel)] border border-[var(--dash-border)] text-[var(--dash-text)] placeholder-[#94a3b8] focus:outline-none focus:ring-1 focus:ring-[var(--dash-accent)]/20 transition-all"
                   />
                   {search && (
                     <button
                       onClick={() => setSearch("")}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-colors"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--dash-muted)] hover:text-[var(--dash-text)] transition-colors"
                     >
                       <X className="w-3 h-3" />
                     </button>
                   )}
                 </div>
                 <button
-                  onClick={() => fetchConversations(page, debouncedSearch, flaggedOnly, true)}
+                  onClick={() =>
+                    fetchConversations(page, debouncedSearch, flaggedOnly, true)
+                  }
                   disabled={refreshing}
                   title="Refresh"
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-black/[0.04] dark:border-white/[0.06] bg-black/[0.02] dark:bg-white/[0.02] text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-all"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--dash-border)] bg-[var(--dash-panel)] text-[var(--dash-muted)] hover:text-[var(--dash-text)] hover:bg-[var(--dash-panel)] transition-all"
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+                  <RefreshCw
+                    className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""} `}
+                  />
                 </button>
               </div>
 
               {/* Filter pills */}
               <div className="flex items-center gap-2">
                 <button
+                  aria-pressed={!flaggedOnly}
                   onClick={() => setFlaggedOnly(false)}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                     !flaggedOnly
-                      ? "bg-[#0f0f15] dark:bg-white text-white dark:text-[#0f0f15]"
-                      : "bg-black/[0.03] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white"
-                  }`}
+                      ? "bg-[var(--dash-selected)] text-[var(--dash-text)]"
+                      : "bg-[var(--dash-panel)] border border-[var(--dash-border)] text-[var(--dash-muted)] hover:text-[var(--dash-text)]"
+                  } `}
                 >
                   All
                 </button>
                 <button
+                  aria-pressed={flaggedOnly}
                   onClick={() => setFlaggedOnly(true)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                     flaggedOnly
-                      ? "bg-amber-500 text-white"
-                      : "bg-black/[0.03] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] text-[#5f6368] dark:text-[#94a3b8] hover:text-amber-600 hover:border-amber-500/30"
-                  }`}
+                      ? "bg-[var(--dash-selected)] text-[var(--dash-amber)]"
+                      : "bg-[var(--dash-panel)] border border-[var(--dash-border)] text-[var(--dash-muted)] hover:text-amber-600 hover:border-amber-500/30"
+                  } `}
                 >
                   <Flag className="w-2.5 h-2.5" />
                   Flagged
                   {!flaggedOnly && flaggedCount > 0 && (
-                    <span className="ml-0.5 bg-amber-500/15 text-amber-600 px-1 rounded text-[9px] font-bold">
+                    <span className="ml-0.5 bg-amber-500/15 text-amber-600 px-1 rounded text-[11px] font-medium">
                       {flaggedCount}
                     </span>
                   )}
@@ -506,38 +523,43 @@ export default function InboxClient({
             <div className="flex-1 overflow-y-auto">
               {loadingList ? (
                 <div className="flex flex-col items-center justify-center h-full py-20 gap-3">
-                  <Loader2 className="w-5 h-5 animate-spin text-[#8f8afc]" />
-                  <p className="text-xs text-[#94a3b8]">Loading conversations…</p>
+                  <Loader2 className="w-5 h-5 animate-spin text-[var(--dash-accent)]" />
+                  <p className="text-xs text-[var(--dash-muted)]">
+                    Loading conversations…
+                  </p>
                 </div>
               ) : conversations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full py-20 gap-4 px-6 text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-lg bg-[var(--dash-panel)] border border-[var(--dash-border)] flex items-center justify-center">
                     {flaggedOnly ? (
-                      <Flag className="w-5 h-5 text-[#94a3b8]" />
+                      <Flag className="w-5 h-5 text-[var(--dash-muted)]" />
                     ) : (
-                      <MailOpen className="w-5 h-5 text-[#94a3b8]" />
+                      <MailOpen className="w-5 h-5 text-[var(--dash-muted)]" />
                     )}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-1">
+                    <p className="text-sm font-medium text-[var(--dash-text)] mb-1">
                       {flaggedOnly
                         ? "No flagged conversations"
                         : debouncedSearch
-                        ? "No matching conversations"
-                        : "No conversations yet"}
+                          ? "No matching conversations"
+                          : "No conversations yet"}
                     </p>
-                    <p className="text-xs text-[#94a3b8]">
+                    <p className="text-xs text-[var(--dash-muted)]">
                       {flaggedOnly
                         ? "Great! No low-confidence responses detected"
                         : debouncedSearch
-                        ? "Try a different search term"
-                        : "When visitors chat with your bot, sessions will appear here"}
+                          ? "Try a different search term"
+                          : "When visitors chat with your bot, sessions will appear here"}
                     </p>
                   </div>
                   {(flaggedOnly || debouncedSearch) && (
                     <button
-                      onClick={() => { setFlaggedOnly(false); setSearch(""); }}
-                      className="text-xs text-[#8f8afc] hover:underline"
+                      onClick={() => {
+                        setFlaggedOnly(false);
+                        setSearch("");
+                      }}
+                      className="text-xs text-[var(--dash-accent)] hover:underline"
                     >
                       Clear filters
                     </button>
@@ -553,13 +575,13 @@ export default function InboxClient({
                           onClick={() => handleSelectConversation(conv)}
                           className={`w-full text-left px-4 py-3.5 transition-all duration-150 group relative ${
                             isSelected
-                              ? "bg-[#8f8afc]/[0.07] dark:bg-[#8f8afc]/[0.1]"
-                              : "hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
-                          }`}
+                              ? "bg-[var(--dash-selected)]"
+                              : "hover:bg-[var(--dash-panel)]"
+                          } `}
                         >
                           {/* Active left accent bar */}
                           {isSelected && (
-                            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#8f8afc] rounded-r-full" />
+                            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--dash-selected)] rounded-r-full" />
                           )}
                           {/* Flagged left accent bar */}
                           {conv.isFlagged && !isSelected && (
@@ -571,11 +593,11 @@ export default function InboxClient({
                             <div
                               className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center mt-0.5 ${
                                 isSelected
-                                  ? "bg-[#8f8afc]/20 text-[#8f8afc]"
+                                  ? "bg-[var(--dash-selected)] text-[var(--dash-accent)]"
                                   : conv.isFlagged
-                                  ? "bg-amber-500/10 text-amber-500"
-                                  : "bg-black/[0.04] dark:bg-white/[0.04] text-[#5f6368] dark:text-[#94a3b8]"
-                              }`}
+                                    ? "bg-amber-500/10 text-amber-500"
+                                    : "bg-[var(--dash-panel)] text-[var(--dash-muted)]"
+                              } `}
                             >
                               {conv.isFlagged ? (
                                 <Flag className="w-4 h-4" />
@@ -588,36 +610,37 @@ export default function InboxClient({
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2 mb-0.5">
                                 <span
-                                  className={`text-[11px] font-mono font-semibold truncate ${
+                                  className={`text-[11px] font-mono font-medium truncate ${
                                     isSelected
-                                      ? "text-[#8f8afc]"
-                                      : "text-[#0f0f15] dark:text-white"
-                                  }`}
+                                      ? "text-[var(--dash-accent)]"
+                                      : "text-[var(--dash-text)]"
+                                  } `}
                                 >
                                   {truncateSessionId(conv.sessionId)}
                                 </span>
-                                <span className="text-[9px] text-[#94a3b8] flex-shrink-0">
+                                <span className="text-[11px] text-[var(--dash-muted)] flex-shrink-0">
                                   {formatTimestamp(conv.updatedAt)}
                                 </span>
                               </div>
 
-                              <p className="text-[11px] text-[#5f6368] dark:text-[#94a3b8] truncate leading-relaxed mb-1.5">
+                              <p className="text-[11px] text-[var(--dash-muted)] truncate leading-relaxed mb-1.5">
                                 {conv.preview}
                               </p>
 
                               <div className="flex items-center gap-2">
                                 <span
-                                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium uppercase tracking-wider ${
                                     isSelected
-                                      ? "bg-[#8f8afc]/15 text-[#8f8afc]"
-                                      : "bg-black/[0.04] dark:bg-white/[0.04] text-[#5f6368] dark:text-[#94a3b8]"
-                                  }`}
+                                      ? "bg-[var(--dash-selected)] text-[var(--dash-accent)]"
+                                      : "bg-[var(--dash-panel)] text-[var(--dash-muted)]"
+                                  } `}
                                 >
                                   <MessageSquare className="w-2.5 h-2.5" />
-                                  {conv.messageCount} msg{conv.messageCount !== 1 ? "s" : ""}
+                                  {conv.messageCount} msg
+                                  {conv.messageCount !== 1 ? "s" : ""}
                                 </span>
                                 {conv.isFlagged && (
-                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400">
                                     <Flag className="w-2.5 h-2.5" />
                                     Flagged
                                   </span>
@@ -628,9 +651,9 @@ export default function InboxClient({
                             <ChevronRight
                               className={`w-3.5 h-3.5 flex-shrink-0 mt-1 transition-all ${
                                 isSelected
-                                  ? "text-[#8f8afc] translate-x-0.5"
+                                  ? "text-[var(--dash-accent)] translate-x-0.5"
                                   : "text-[#d1d5db] dark:text-[#374151] group-hover:text-[#94a3b8] group-hover:translate-x-0.5"
-                              }`}
+                              } `}
                             />
                           </div>
                         </button>
@@ -643,21 +666,21 @@ export default function InboxClient({
 
             {/* Pagination */}
             {pages > 1 && (
-              <div className="p-3 border-t border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between gap-2">
+              <div className="p-3 border-t border-[var(--dash-border)] flex items-center justify-between gap-2">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1 || loadingList}
-                  className="text-[10px] font-medium px-3 py-1.5 rounded-md border border-black/[0.04] dark:border-white/[0.06] text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:bg-black/[0.02] dark:hover:bg-white/[0.02] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="text-[11px] font-medium px-3 py-1.5 rounded-md border border-[var(--dash-border)] text-[var(--dash-muted)] hover:text-[var(--dash-text)] hover:bg-[var(--dash-panel)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
                   Previous
                 </button>
-                <span className="text-[10px] text-[#94a3b8]">
+                <span className="text-[11px] text-[var(--dash-muted)]">
                   Page {page} of {pages}
                 </span>
                 <button
                   onClick={() => setPage((p) => Math.min(pages, p + 1))}
                   disabled={page === pages || loadingList}
-                  className="text-[10px] font-medium px-3 py-1.5 rounded-md border border-black/[0.04] dark:border-white/[0.06] text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:bg-black/[0.02] dark:hover:bg-white/[0.02] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="text-[11px] font-medium px-3 py-1.5 rounded-md border border-[var(--dash-border)] text-[var(--dash-muted)] hover:text-[var(--dash-text)] hover:bg-[var(--dash-panel)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
                   Next
                 </button>
@@ -669,55 +692,61 @@ export default function InboxClient({
           <div
             className={`flex-1 flex flex-col min-w-0 ${
               !mobileShowThread ? "hidden lg:flex" : "flex"
-            }`}
+            } `}
           >
             {!selectedSessionId ? (
               /* Empty state */
               <div className="flex flex-col items-center justify-center h-full text-center px-10 gap-5">
-                <div className="w-16 h-16 rounded-3xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-center">
+                <div className="w-16 h-16 rounded-3xl bg-[var(--dash-panel)] border border-[var(--dash-border)] flex items-center justify-center">
                   <MessageSquare className="w-7 h-7 text-[#d1d5db] dark:text-[#374151]" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-[#0f0f15] dark:text-white mb-1.5">
+                  <p className="text-sm font-medium text-[var(--dash-text)] mb-1.5">
                     Select a conversation
                   </p>
-                  <p className="text-xs text-[#94a3b8] leading-relaxed max-w-xs">
-                    Click any session from the left to read the full message thread and export it
+                  <p className="text-xs text-[var(--dash-muted)] leading-relaxed max-w-xs">
+                    Click any session from the left to read the full message
+                    thread and export it
                   </p>
                 </div>
               </div>
             ) : (
               <>
                 {/* Thread Header */}
-                <div className="p-4 border-b border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between gap-3">
+                <div className="p-4 border-b border-[var(--dash-border)] flex items-center justify-between gap-3">
                   {/* Mobile back */}
                   <button
-                    onClick={() => { setMobileShowThread(false); setSelectedSessionId(null); }}
-                    className="lg:hidden w-7 h-7 flex items-center justify-center rounded-lg hover:bg-black/[0.04] dark:hover:bg-white/[0.04] text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white transition-all"
+                    onClick={() => {
+                      setMobileShowThread(false);
+                      setSelectedSessionId(null);
+                    }}
+                    className="lg:hidden w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[var(--dash-panel)] text-[var(--dash-muted)] hover:text-[var(--dash-text)] transition-all"
                   >
                     <ArrowLeft className="w-4 h-4" />
                   </button>
 
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-[#8f8afc]/10 dark:bg-[#8f8afc]/15 flex items-center justify-center flex-shrink-0">
-                      <User className="w-4 h-4 text-[#8f8afc]" />
+                    <div className="w-8 h-8 rounded-full bg-[var(--dash-selected)] flex items-center justify-center flex-shrink-0">
+                      <User className="w-4 h-4 text-[var(--dash-accent)]" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <Hash className="w-3 h-3 text-[#94a3b8] flex-shrink-0" />
-                        <p className="text-[11px] font-mono font-semibold text-[#0f0f15] dark:text-white truncate">
+                        <Hash className="w-3 h-3 text-[var(--dash-muted)] flex-shrink-0" />
+                        <p className="text-[11px] font-mono font-medium text-[var(--dash-text)] truncate">
                           {selectedSessionId}
                         </p>
                         {/* Flagged badge on header */}
-                        {conversations.find((c) => c.sessionId === selectedSessionId)?.isFlagged && (
-                          <span className="flex-shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        {conversations.find(
+                          (c) => c.sessionId === selectedSessionId,
+                        )?.isFlagged && (
+                          <span className="flex-shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                             <Flag className="w-2.5 h-2.5" />
                             Flagged
                           </span>
                         )}
                       </div>
                       {detail && (
-                        <p className="text-[10px] text-[#94a3b8]">
+                        <p className="text-[11px] text-[var(--dash-muted)]">
                           {detail.messages.length} messages · Started{" "}
                           {formatFullTimestamp(detail.createdAt)}
                         </p>
@@ -732,32 +761,41 @@ export default function InboxClient({
                       <div className="relative" ref={exportMenuRef}>
                         <button
                           onClick={() => setExportMenuOpen((v) => !v)}
-                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-black/[0.04] dark:border-white/[0.06] text-[10px] font-semibold text-[#5f6368] dark:text-[#94a3b8] hover:text-[#0f0f15] dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.03] transition-all"
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[var(--dash-border)] text-[11px] font-medium text-[var(--dash-muted)] hover:text-[var(--dash-text)] hover:bg-[var(--dash-panel)] transition-all"
                         >
                           <Download className="w-3 h-3" />
                           Export
                         </button>
 
                         {exportMenuOpen && (
-                          <div className="absolute right-0 top-full mt-1.5 w-44 rounded-xl border border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1a1a24] shadow-xl z-30 overflow-hidden animate-fade-in">
+                          <div className="absolute right-0 top-full mt-1.5 w-44 rounded-lg border border-[var(--dash-border)] bg-[var(--dash-panel)] dark:bg-[#1a1a24] z-30 overflow-hidden">
                             <div className="p-1">
                               <button
-                                onClick={() => { exportAsCSV(detail); setExportMenuOpen(false); }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-[#0f0f15] dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors text-left"
+                                onClick={() => {
+                                  exportAsCSV(detail);
+                                  setExportMenuOpen(false);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-[var(--dash-text)] hover:bg-[var(--dash-panel)] transition-colors text-left"
                               >
                                 <FileText className="w-3.5 h-3.5 text-emerald-500" />
                                 Download CSV
                               </button>
                               <button
-                                onClick={() => { exportAsJSON(detail); setExportMenuOpen(false); }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-[#0f0f15] dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors text-left"
+                                onClick={() => {
+                                  exportAsJSON(detail);
+                                  setExportMenuOpen(false);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-[var(--dash-text)] hover:bg-[var(--dash-panel)] transition-colors text-left"
                               >
                                 <FileJson className="w-3.5 h-3.5 text-blue-500" />
                                 Download JSON
                               </button>
                               <button
-                                onClick={() => { exportAsPDF(detail); setExportMenuOpen(false); }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-[#0f0f15] dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors text-left"
+                                onClick={() => {
+                                  exportAsPDF(detail);
+                                  setExportMenuOpen(false);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-medium text-[var(--dash-text)] hover:bg-[var(--dash-panel)] transition-colors text-left"
                               >
                                 <Printer className="w-3.5 h-3.5 text-red-500" />
                                 Print / PDF
@@ -771,13 +809,13 @@ export default function InboxClient({
                     {/* Delete */}
                     {deleteConfirm === selectedSessionId ? (
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-red-500 dark:text-red-400 font-medium">
+                        <span className="text-[11px] text-red-500 dark:text-red-400 font-medium">
                           Delete?
                         </span>
                         <button
                           onClick={() => handleDelete(selectedSessionId)}
                           disabled={!!deletingSessionId}
-                          className="text-[10px] font-bold px-2.5 py-1 rounded-md bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all disabled:opacity-50"
+                          className="text-[11px] font-medium px-2.5 py-1 rounded-md bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all disabled:opacity-50"
                         >
                           {deletingSessionId ? (
                             <Loader2 className="w-3 h-3 animate-spin" />
@@ -787,7 +825,7 @@ export default function InboxClient({
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(null)}
-                          className="text-[10px] font-medium px-2.5 py-1 rounded-md border border-black/[0.04] dark:border-white/[0.06] text-[#5f6368] dark:text-[#94a3b8] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-all"
+                          className="text-[11px] font-medium px-2.5 py-1 rounded-md border border-[var(--dash-border)] text-[var(--dash-muted)] hover:bg-[var(--dash-panel)] transition-all"
                         >
                           Cancel
                         </button>
@@ -795,7 +833,7 @@ export default function InboxClient({
                     ) : (
                       <button
                         onClick={() => setDeleteConfirm(selectedSessionId)}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-black/[0.04] dark:border-white/[0.06] text-[#94a3b8] hover:text-red-500 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
+                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--dash-border)] text-[var(--dash-muted)] hover:text-red-500 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
                         title="Delete conversation"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -808,56 +846,64 @@ export default function InboxClient({
                 <div className="flex-1 overflow-y-auto p-5 space-y-4">
                   {loadingDetail ? (
                     <div className="flex flex-col items-center justify-center h-full gap-3">
-                      <Loader2 className="w-5 h-5 animate-spin text-[#8f8afc]" />
-                      <p className="text-xs text-[#94a3b8]">Loading messages…</p>
+                      <Loader2 className="w-5 h-5 animate-spin text-[var(--dash-accent)]" />
+                      <p className="text-xs text-[var(--dash-muted)]">
+                        Loading messages…
+                      </p>
                     </div>
                   ) : detail ? (
                     <>
                       {detail.messages.map((msg, idx) => {
-                        const flagged = msg.role === "assistant" && isMessageFlagged(msg.content);
+                        const flagged =
+                          msg.role === "assistant" &&
+                          isMessageFlagged(msg.content);
                         return (
                           <div
                             key={idx}
-                            className={`flex items-end gap-2.5 animate-fade-in ${
-                              msg.role === "user" ? "flex-row-reverse" : "flex-row"
-                            }`}
+                            className={`flex items-end gap-2.5 ${
+                              msg.role === "user"
+                                ? "flex-row-reverse"
+                                : "flex-row"
+                            } `}
                           >
                             {/* Avatar */}
                             <div
                               className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center mb-1 ${
                                 msg.role === "user"
-                                  ? "bg-[#0f0f15] dark:bg-white"
+                                  ? "bg-[#0f0f15] bg-[var(--dash-panel)]"
                                   : flagged
-                                  ? "bg-amber-500/15"
-                                  : "bg-[#8f8afc]/15 dark:bg-[#8f8afc]/20"
-                              }`}
+                                    ? "bg-amber-500/15"
+                                    : "bg-[var(--dash-selected)]"
+                              } `}
                             >
                               {msg.role === "user" ? (
-                                <User className="w-3.5 h-3.5 text-white dark:text-[#0f0f15]" />
+                                <User className="w-3.5 h-3.5 text-[var(--dash-text)]" />
                               ) : flagged ? (
                                 <Flag className="w-3.5 h-3.5 text-amber-500" />
                               ) : (
-                                <Bot className="w-3.5 h-3.5 text-[#8f8afc]" />
+                                <Bot className="w-3.5 h-3.5 text-[var(--dash-accent)]" />
                               )}
                             </div>
 
                             {/* Bubble */}
                             <div
                               className={`max-w-[72%] group flex flex-col gap-1 ${
-                                msg.role === "user" ? "items-end" : "items-start"
-                              }`}
+                                msg.role === "user"
+                                  ? "items-end"
+                                  : "items-start"
+                              } `}
                             >
                               <div
-                                className={`px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap break-words ${
+                                className={`px-3.5 py-2.5 rounded-lg text-xs leading-relaxed whitespace-pre-wrap break-words ${
                                   msg.role === "user"
-                                    ? "bg-[#0f0f15] dark:bg-white text-white dark:text-[#0f0f15] rounded-br-sm"
+                                    ? "bg-[#0f0f15] bg-[var(--dash-panel)] text-[var(--dash-text)] rounded-br-sm"
                                     : flagged
-                                    ? "bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-[#0f0f15] dark:text-[#f1f5f9] rounded-bl-sm"
-                                    : "bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] text-[#0f0f15] dark:text-[#f1f5f9] rounded-bl-sm"
-                                }`}
+                                      ? "bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-[var(--dash-text)] dark:text-[#f1f5f9] rounded-bl-sm"
+                                      : "bg-[var(--dash-panel)] border border-[var(--dash-border)] text-[var(--dash-text)] dark:text-[#f1f5f9] rounded-bl-sm"
+                                } `}
                               >
                                 {flagged && (
-                                  <span className="flex items-center gap-1 text-[9px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1.5">
+                                  <span className="flex items-center gap-1 text-[11px] font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1.5">
                                     <Flag className="w-2.5 h-2.5" />
                                     Low confidence response
                                   </span>
@@ -867,11 +913,13 @@ export default function InboxClient({
                               {/* Timestamp on hover */}
                               <div
                                 className={`flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${
-                                  msg.role === "user" ? "flex-row-reverse" : "flex-row"
-                                }`}
+                                  msg.role === "user"
+                                    ? "flex-row-reverse"
+                                    : "flex-row"
+                                } `}
                               >
-                                <Clock className="w-2.5 h-2.5 text-[#94a3b8]" />
-                                <span className="text-[9px] text-[#94a3b8]">
+                                <Clock className="w-2.5 h-2.5 text-[var(--dash-muted)]" />
+                                <span className="text-[11px] text-[var(--dash-muted)]">
                                   {formatFullTimestamp(msg.timestamp)}
                                 </span>
                               </div>
@@ -886,11 +934,11 @@ export default function InboxClient({
 
                 {/* Thread Footer */}
                 {detail && (
-                  <div className="p-3.5 border-t border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-2 text-[10px] text-[#94a3b8]">
+                  <div className="p-3.5 border-t border-[var(--dash-border)] flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2 text-[11px] text-[var(--dash-muted)]">
                       <Clock className="w-3 h-3" />
                       Last activity:{" "}
-                      <span className="font-medium text-[#5f6368] dark:text-[#64748b]">
+                      <span className="font-medium text-[var(--dash-muted)]">
                         {formatTimestamp(detail.updatedAt)}
                       </span>
                     </div>
@@ -898,17 +946,19 @@ export default function InboxClient({
                       {/* Flagged message count badge */}
                       {(() => {
                         const flaggedMsgs = detail.messages.filter(
-                          (m) => m.role === "assistant" && isMessageFlagged(m.content)
+                          (m) =>
+                            m.role === "assistant" &&
+                            isMessageFlagged(m.content),
                         ).length;
                         if (flaggedMsgs === 0) return null;
                         return (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[11px] font-medium text-amber-600 dark:text-amber-400">
                             <Flag className="w-2.5 h-2.5" />
                             {flaggedMsgs} flagged
                           </span>
                         );
                       })()}
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-black/[0.03] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] text-[10px] text-[#94a3b8]">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--dash-panel)] border border-[var(--dash-border)] text-[11px] text-[var(--dash-muted)]">
                         <MessageSquare className="w-2.5 h-2.5" />
                         {detail.messages.length} messages
                       </span>

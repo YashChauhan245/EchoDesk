@@ -1,17 +1,9 @@
 "use client";
 
+import { PageHeading } from "@/app/dashboard/DashboardUI";
+
 import { useState } from "react";
-import { 
-  Code, 
-  Copy, 
-  Check, 
-  Terminal, 
-  FileCode, 
-  Sparkles,
-  ArrowRight,
-  Info,
-  Bot
-} from "lucide-react";
+import { Copy, Check, Terminal, Info, Bot } from "lucide-react";
 
 interface ChatbotOption {
   _id: string;
@@ -31,7 +23,7 @@ export default function EmbedCodeClient({
   appUrl,
 }: EmbedCodeClientProps) {
   const [selectedBotId, setSelectedBotId] = useState(
-    chatbots.length > 0 ? chatbots[0]._id : organizationId
+    chatbots.length > 0 ? chatbots[0]._id : organizationId,
   );
   const [copied, setCopied] = useState(false);
 
@@ -59,48 +51,43 @@ export default function EmbedCodeClient({
   }
 
   return (
-    <div className="animate-fade-in space-y-8 max-w-4xl relative">
-      {/* Soft header radial glow backdrop */}
-      <div className="absolute top-0 left-0 right-0 h-[220px] bg-gradient-to-b from-[#8f8afc]/[0.02] dark:from-[#8f8afc]/[0.04] to-transparent pointer-events-none -z-10 blur-xl" />
-
+    <div className="space-y-8 max-w-none relative">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0f0f15] dark:text-white mb-2">
-          Embed Code
-        </h1>
-        <p className="text-xs sm:text-sm text-[#5f6368] dark:text-[#94a3b8]">
-          Add your AI customer support chatbot widget to any website with a single script tag.
-        </p>
-      </div>
+      <PageHeading
+        eyebrow="Installation"
+        title="One script. Right where you need it."
+        description="Add your agent to your website with a single script."
+      />
 
       {/* Chatbot Selector */}
       {chatbots.length > 1 && (
-        <div className="glass-card p-6 sm:p-7 shadow-sm max-w-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="rounded-lg border border-[var(--dash-border)] bg-[var(--dash-panel)] p-6 sm:p-7 max-w-none flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Bot className="w-5 h-5 text-[#8f8afc]" />
+            <Bot className="w-5 h-5 text-[var(--dash-accent)]" />
             <div>
-              <label className="block text-xs font-semibold text-[#0f0f15] dark:text-white mb-0.5">
+              <label className="block font-medium text-[var(--dash-text)] mb-0.5 text-[13px]">
                 Select Chatbot Widget
               </label>
-              <p className="text-[10px] text-[#5f6368] dark:text-[#94a3b8]">
+              <p className="text-[11px] text-[var(--dash-muted)]">
                 Get the distinct embed script for a specific application target
               </p>
             </div>
           </div>
           <div>
             <select
+              aria-label="Select chatbot"
               value={selectedBotId}
               onChange={(e) => setSelectedBotId(e.target.value)}
-              className="border border-black/[0.015] dark:border-white/[0.015] text-xs font-semibold rounded-lg px-3 py-2 outline-none focus:border-[#6366f1] transition-colors cursor-pointer"
+              className="min-h-10 border border-[var(--dash-border)] text-base sm:text-[13px] font-medium rounded-md px-3 py-2 outline-none focus:border-[var(--dash-accent)] transition-colors cursor-pointer"
               style={{
                 color: "var(--text-primary)",
                 backgroundColor: "var(--bg-secondary)",
               }}
             >
               {chatbots.map((bot) => (
-                <option 
-                  key={bot._id} 
-                  value={bot._id} 
+                <option
+                  key={bot._id}
+                  value={bot._id}
                   style={{
                     color: "var(--text-primary)",
                     backgroundColor: "var(--bg-card)",
@@ -115,32 +102,39 @@ export default function EmbedCodeClient({
       )}
 
       {chatbots.length === 0 && (
-        <div className="p-4 bg-[#8f8afc]/10 border border-[#8f8afc]/20 text-[#8f8afc] rounded-xl text-xs max-w-3xl flex items-center gap-3">
+        <div className="p-4 bg-[var(--dash-selected)] border border-[var(--dash-border)] text-[var(--dash-accent)] rounded-lg text-xs max-w-none flex items-center gap-3">
           <Info className="w-4 h-4 flex-shrink-0" />
-          <span>You haven't configured any chatbots yet. Go to settings to create one first, or copy the legacy script below.</span>
+          <span>
+            You haven't configured any chatbots yet. Go to settings to create
+            one first, or copy the legacy script below.
+          </span>
         </div>
       )}
 
       {/* Embed Code Card */}
-      <div className="glass-card p-6 sm:p-7 shadow-sm max-w-3xl relative">
+      <div className="rounded-lg border border-[var(--dash-border)] bg-[var(--dash-panel)] p-6 sm:p-7 max-w-none relative">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-white dark:bg-[#0c0c14] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-black dark:text-white">
+            <div className="w-7 h-7 rounded-lg bg-[var(--dash-panel)] border border-[var(--dash-border)] flex items-center justify-center text-[var(--dash-text)]">
               <Terminal className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white">Your Embed Script</h2>
-              <p className="text-[10px] text-[#5f6368] dark:text-[#94a3b8]">Copy the script element block to your site</p>
+              <h2 className="font-medium text-[var(--dash-text)] text-[15px]">
+                Your Embed Script
+              </h2>
+              <p className="text-[11px] text-[var(--dash-muted)]">
+                Copy the script element block to your site
+              </p>
             </div>
           </div>
 
           <button
             onClick={handleCopy}
-            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-sm w-full sm:w-auto ${
+            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-xs font-medium transition-all cursor-pointer w-full sm:w-auto ${
               copied
                 ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-900/10"
-                : "btn-secondary"
-            }`}
+                : "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-[var(--dash-border)] bg-[var(--dash-panel)] px-3.5 py-2 text-[13px] font-medium text-[var(--dash-text)] transition-colors hover:bg-[var(--dash-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+            } `}
           >
             {copied ? (
               <>
@@ -157,23 +151,47 @@ export default function EmbedCodeClient({
         </div>
 
         {/* Code display block */}
-        <div className="code-block relative group select-all">
-          <pre className="text-xs font-mono leading-relaxed text-neutral-800 dark:text-neutral-200">
+        <div className="overflow-x-auto rounded-md border border-[var(--dash-border)] bg-[var(--dash-input)] p-5 select-all">
+          <pre className="text-xs font-mono leading-relaxed text-[var(--dash-text)]">
             <code>
-              <span className="text-[#94a3b8] dark:text-[#5f6368]">&lt;!-- EchoDesk AI Chatbot Embed --&gt;</span>{"\n"}
-              <span className="text-neutral-900 dark:text-white font-semibold">&lt;script</span>{"\n"}
-              {"  "}<span className="text-[#4b5563] dark:text-[#94a3b8]">src</span>=<span className="text-emerald-700 dark:text-emerald-400">"{appUrl}/chatbot.js"</span>{"\n"}
-              {"  "}<span className="text-[#4b5563] dark:text-[#94a3b8]">data-org-id</span>=<span className="text-emerald-700 dark:text-emerald-400">"{selectedBotId}"</span>{"\n"}
-              <span className="text-neutral-900 dark:text-white font-semibold">&gt;&lt;/script&gt;</span>
+              <span className="text-[var(--dash-muted)]">
+                &lt;!-- EchoDesk AI Chatbot Embed --&gt;
+              </span>
+              {"\n"}
+              <span className="text-[var(--dash-text)] font-medium">
+                &lt;script
+              </span>
+              {"\n"}
+              {"  "}
+              <span className="text-[#4b5563] text-[var(--dash-muted)]">
+                src
+              </span>
+              =
+              <span className="text-emerald-700 dark:text-emerald-400">
+                "{appUrl}/chatbot.js"
+              </span>
+              {"\n"}
+              {"  "}
+              <span className="text-[#4b5563] text-[var(--dash-muted)]">
+                data-org-id
+              </span>
+              =
+              <span className="text-emerald-700 dark:text-emerald-400">
+                "{selectedBotId}"
+              </span>
+              {"\n"}
+              <span className="text-[var(--dash-text)] font-medium">
+                &gt;&lt;/script&gt;
+              </span>
             </code>
           </pre>
         </div>
       </div>
 
       {/* Installation Milestones */}
-      <div className="glass-card p-6 sm:p-7 shadow-sm max-w-3xl relative">
-        <h2 className="text-sm font-semibold text-[#0f0f15] dark:text-white mb-6 flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-white dark:bg-[#0c0c14] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-black dark:text-white">
+      <div className="rounded-lg border border-[var(--dash-border)] bg-[var(--dash-panel)] p-6 sm:p-7 max-w-none relative">
+        <h2 className="font-medium text-[var(--dash-text)] mb-6 flex items-center gap-2.5 text-[15px]">
+          <div className="w-7 h-7 rounded-lg bg-[var(--dash-panel)] border border-[var(--dash-border)] flex items-center justify-center text-[var(--dash-text)]">
             <Info className="w-4 h-4" />
           </div>
           How to Deploy
@@ -183,39 +201,55 @@ export default function EmbedCodeClient({
           {/* Step 1 */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className="w-6 h-6 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-xs font-bold text-[#0f0f15] dark:text-white">
+              <span className="w-6 h-6 rounded-full bg-[var(--dash-panel)] border border-[var(--dash-border)] flex items-center justify-center text-xs font-medium text-[var(--dash-text)]">
                 1
               </span>
-              <h4 className="text-xs font-semibold text-[#0f0f15] dark:text-white uppercase tracking-wider">Copy code</h4>
+              <h4 className="text-xs font-medium text-[var(--dash-text)] uppercase tracking-wider">
+                Copy code
+              </h4>
             </div>
-            <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] leading-relaxed">
-              Retrieve your unique script elements by selecting your chatbot and clicking the <span className="text-[#0f0f15] dark:text-white font-semibold">Copy Snippet</span> button above.
+            <p className="text-xs text-[var(--dash-muted)] leading-relaxed">
+              Retrieve your unique script elements by selecting your chatbot and
+              clicking the{" "}
+              <span className="text-[var(--dash-text)] font-medium">
+                Copy Snippet
+              </span>{" "}
+              button above.
             </p>
           </div>
 
           {/* Step 2 */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className="w-6 h-6 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-xs font-bold text-[#0f0f15] dark:text-white">
+              <span className="w-6 h-6 rounded-full bg-[var(--dash-panel)] border border-[var(--dash-border)] flex items-center justify-center text-xs font-medium text-[var(--dash-text)]">
                 2
               </span>
-              <h4 className="text-xs font-semibold text-[#0f0f15] dark:text-white uppercase tracking-wider">Paste in HTML</h4>
+              <h4 className="text-xs font-medium text-[var(--dash-text)] uppercase tracking-wider">
+                Paste in HTML
+              </h4>
             </div>
-            <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] leading-relaxed">
-              Inject the code block before the closing <code className="text-[#0f0f15] dark:text-white font-mono">&lt;/body&gt;</code> tag on any target page layout.
+            <p className="text-xs text-[var(--dash-muted)] leading-relaxed">
+              Inject the code block before the closing{" "}
+              <code className="text-[var(--dash-text)] font-mono">
+                &lt;/body&gt;
+              </code>{" "}
+              tag on any target page layout.
             </p>
           </div>
 
           {/* Step 3 */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className="w-6 h-6 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.015] dark:border-white/[0.015] flex items-center justify-center text-xs font-bold text-[#0f0f15] dark:text-white">
+              <span className="w-6 h-6 rounded-full bg-[var(--dash-panel)] border border-[var(--dash-border)] flex items-center justify-center text-xs font-medium text-[var(--dash-text)]">
                 3
               </span>
-              <h4 className="text-xs font-semibold text-[#0f0f15] dark:text-white uppercase tracking-wider">Instant Chat</h4>
+              <h4 className="text-xs font-medium text-[var(--dash-text)] uppercase tracking-wider">
+                Instant Chat
+              </h4>
             </div>
-            <p className="text-xs text-[#5f6368] dark:text-[#94a3b8] leading-relaxed">
-              A floating support bubble widget appears dynamically. Updates to configurations apply instantly without code changes.
+            <p className="text-xs text-[var(--dash-muted)] leading-relaxed">
+              A floating support bubble widget appears dynamically. Updates to
+              configurations apply instantly without code changes.
             </p>
           </div>
         </div>
