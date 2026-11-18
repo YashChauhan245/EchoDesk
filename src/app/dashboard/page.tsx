@@ -12,23 +12,22 @@ export default async function DashboardPage() {
 
   await dbConnect();
 
-  // Fetch chatbot settings and conversation count for this org
-  const settings = await ChatbotSettings.findOne({
-    organizationId: session.organizationId,
-  }).lean();
+  // These reads are independent, so wait for them together.
+  const organizationFilter = { organizationId: session.organizationId };
+  const [settings, conversationCount, savedSubscription, chatbotsCreated, recent] =
+    await Promise.all([
+      ChatbotSettings.findOne(organizationFilter).lean(),
+      Conversation.countDocuments(organizationFilter),
+      Subscription.findOne(organizationFilter).lean(),
+      ChatbotSettings.countDocuments(organizationFilter),
+      Conversation.find(organizationFilter)
+        .sort({ updatedAt: -1 })
+        .limit(3)
+        .select({ sessionId: 1, messages: 1, updatedAt: 1 })
+        .lean(),
+    ]);
 
-  const conversationCount = await Conversation.countDocuments({
-    organizationId: session.organizationId,
-  });
-
-  // Fetch or mock subscription details
-  let subscription = (await Subscription.findOne({
-    organizationId: session.organizationId,
-  }).lean()) as any;
-
-  const chatbotsCreated = await ChatbotSettings.countDocuments({
-    organizationId: session.organizationId,
-  });
+  let subscription = savedSubscription;
 
   if (!subscription) {
     subscription = {
@@ -43,7 +42,7 @@ export default async function DashboardPage() {
         messagesUsed: 0,
         chatbotsCreated: chatbotsCreated,
       },
-    } as any;
+    };
   } else if (subscription.usage?.chatbotsCreated !== chatbotsCreated) {
     // Sync the cache in subscription document
     await Subscription.updateOne(
@@ -52,14 +51,6 @@ export default async function DashboardPage() {
     );
     subscription.usage.chatbotsCreated = chatbotsCreated;
   }
-
-  const recent = await Conversation.find({
-    organizationId: session.organizationId,
-  })
-    .sort({ updatedAt: -1 })
-    .limit(3)
-    .select({ sessionId: 1, messages: 1, updatedAt: 1 })
-    .lean();
 
   const fallbackPhrases = [
     "i don't have that information",
